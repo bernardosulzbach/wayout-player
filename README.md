@@ -1,3 +1,3 @@
-# WayOut Player
+# Wayout Player
 
-An automated player for the game WayOut.
+An automated player for the [Wayout](https://store.steampowered.com/app/551110/Wayout/) game.
