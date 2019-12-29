@@ -1,2 +1,3 @@
-# wayout-player
-An automated player for the game WayOut
+# WayOut Player
+
+An automated player for the game WayOut.
