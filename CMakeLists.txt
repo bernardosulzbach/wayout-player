@@ -32,7 +32,12 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIR})
 set(Boost_USE_MULTITHREADED ON)
 
-add_library(wayout-player OBJECT src/Board.cpp src/Board.hpp src/Types.hpp)
+add_library(wayout-player OBJECT
+            src/Board.cpp
+            src/Board.hpp
+            src/Types.hpp
+            src/Position.cpp
+            src/Position.hpp)
 
 find_package(Threads REQUIRED)
 

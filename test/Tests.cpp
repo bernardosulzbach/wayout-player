@@ -5,8 +5,17 @@
 
 #include "../src/Board.hpp"
 
+using namespace WayOutPlayer;
+
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
   const auto boardString = "..###\n.....\n#....\n####.\n.#...";
-  const auto board = WayoutPlayer::Board::fromString(boardString);
+  const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
+}
+
+BOOST_AUTO_TEST_CASE(boardSolutionTest) {
+  const auto boardString = ".....\n..#..\n.###.\n..#..\n.....";
+  const auto boardSolution = Board::fromString(boardString).findOptimalSolution();
+  const auto center = Position{2, 2};
+  BOOST_CHECK(boardSolution == std::vector<Position>{center});
 }
