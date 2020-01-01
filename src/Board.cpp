@@ -62,7 +62,7 @@ void Board::activate(S32 i, S32 j) {
   if (hasTile(i, j)) {
     const auto tile = getTile(i, j);
     safeInvert(i, j, true);
-    if (tile.type == TileType::Normal) {
+    if (tile.type == TileType::Normal || tile.type == TileType::Tap) {
       safeInvert(i - 1, j);
       safeInvert(i, j - 1);
       safeInvert(i, j + 1);
@@ -73,16 +73,11 @@ void Board::activate(S32 i, S32 j) {
     } else if (tile.type == TileType::Vertical) {
       safeInvert(i - 1, j);
       safeInvert(i + 1, j);
-    } else if (tile.type == TileType::Tap) {
-      safeInvert(i - 1, j);
-      safeInvert(i, j - 1);
-      safeInvert(i, j + 1);
-      safeInvert(i + 1, j);
     }
   }
 }
 
-std::vector<Position> Board::findOptimalSolution(bool flipOnlyUp) const {
+Solution Board::findOptimalSolution(bool flipOnlyUp) const {
   struct State {
     Board board;
     std::vector<std::vector<bool>> clicked;
@@ -122,7 +117,7 @@ std::vector<Position> Board::findOptimalSolution(bool flipOnlyUp) const {
     const auto state = stateQueue.front();
     stateQueue.pop();
     if (state.board.isSolved()) {
-      return state.getClickPositionVector();
+      return Solution(state.getClickPositionVector(), !flipOnlyUp);
     }
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {

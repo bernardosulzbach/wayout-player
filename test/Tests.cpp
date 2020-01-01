@@ -20,9 +20,15 @@ BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
-  // const auto boardString = ".....\n..#..\n.###.\n..#..\n.....";
   const auto boardString = "N0 N1 N0\nN1 N1 N1\nN0 N1 N0";
   const auto boardSolution = Board::fromString(boardString).findOptimalSolution();
-  const auto center = Position{1, 1};
-  BOOST_CHECK(boardSolution == std::vector<Position>{center});
+  const auto expectedSolution = Solution({Position{1, 1}}, true);
+  BOOST_CHECK(boardSolution == expectedSolution);
+}
+
+BOOST_AUTO_TEST_CASE(boardSolutionTestWithTaps) {
+  const auto boardString = "N0 N1 N0\nN1 T1 N1\nN0 N1 N0";
+  const auto boardSolution = Board::fromString(boardString).findOptimalSolution();
+  const auto expectedSolution = Solution({Position{1, 1}}, true);
+  BOOST_CHECK(boardSolution == expectedSolution);
 }

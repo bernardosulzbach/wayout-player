@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Position.hpp"
+#include "Solution.hpp"
 #include "Tile.hpp"
 #include "Types.hpp"
 
@@ -34,7 +35,7 @@ public:
 
   void activate(S32 i, S32 j);
 
-  [[nodiscard]] std::vector<Position> findOptimalSolution(bool flipOnlyUp = false) const;
+  [[nodiscard]] Solution findOptimalSolution(bool flipOnlyUp = false) const;
 
   [[nodiscard]] std::size_t hash() const;
 

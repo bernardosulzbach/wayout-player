@@ -33,6 +33,8 @@ include_directories(${Boost_INCLUDE_DIR})
 set(Boost_USE_MULTITHREADED ON)
 
 add_library(wayout-player OBJECT
+            src/ArgumentParser.cpp
+            src/ArgumentParser.hpp
             src/Board.cpp
             src/Board.hpp
             src/Types.hpp
@@ -43,7 +45,9 @@ add_library(wayout-player OBJECT
             src/TileType.cpp
             src/TileType.hpp
             src/Filesystem.cpp
-            src/Filesystem.hpp)
+            src/Filesystem.hpp
+            src/Solution.cpp
+            src/Solution.hpp)
 
 find_package(Threads REQUIRED)
 

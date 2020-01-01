@@ -1,3 +1,4 @@
+#include "ArgumentParser.hpp"
 #include "Board.hpp"
 #include "Filesystem.hpp"
 
@@ -5,14 +6,14 @@
 
 using namespace WayoutPlayer;
 
-int main() {
+int main(int argc, char **argv) {
   try {
-    const auto boardString = readFile("../input/M.txt");
+    ArgumentParser argumentParser;
+    argumentParser.parseArguments(argc, argv);
+    const auto boardString = readFile(argumentParser.getArgument(1));
     const auto board = Board::fromString(boardString);
     std::cout << board.toString() << '\n';
-    for (const auto position : board.findOptimalSolution(true)) {
-      std::cout << position.toString(2) << '\n';
-    }
+    std::cout << board.findOptimalSolution().toString() << '\n';
   } catch (std::exception &exception) {
     std::cout << "Threw an exception." << '\n';
     std::cout << "  " << exception.what() << '\n';
