@@ -37,7 +37,13 @@ add_library(wayout-player OBJECT
             src/Board.hpp
             src/Types.hpp
             src/Position.cpp
-            src/Position.hpp)
+            src/Position.hpp
+            src/Tile.cpp
+            src/Tile.hpp
+            src/TileType.cpp
+            src/TileType.hpp
+            src/Filesystem.cpp
+            src/Filesystem.hpp)
 
 find_package(Threads REQUIRED)
 

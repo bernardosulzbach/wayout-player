@@ -1,12 +1,13 @@
 #include "Board.hpp"
+#include "Filesystem.hpp"
 
 #include <iostream>
 
-using namespace WayOutPlayer;
+using namespace WayoutPlayer;
 
 int main() {
   try {
-    const auto boardString = "..###\n.....\n#....\n####.\n.#...";
+    const auto boardString = readFile("../input/M.txt");
     const auto board = Board::fromString(boardString);
     std::cout << board.toString() << '\n';
     for (const auto position : board.findOptimalSolution(true)) {

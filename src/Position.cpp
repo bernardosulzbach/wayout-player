@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace WayOutPlayer {
+namespace WayoutPlayer {
 bool Position::operator==(const Position &rhs) const {
   return i == rhs.i && j == rhs.j;
 }
@@ -17,7 +17,17 @@ std::string Position::toString(std::size_t width) const {
   if (width > 0) {
     stream << std::setw(width);
   }
-  stream << "(" << i << ", " << j << ")";
+  stream << "(";
+  if (width > 0) {
+    stream << std::setw(width);
+  }
+  stream << i;
+  stream << ", ";
+  if (width > 0) {
+    stream << std::setw(width);
+  }
+  stream << j;
+  stream << ")";
   return stream.str();
 }
-} // namespace WayOutPlayer
+} // namespace WayoutPlayer

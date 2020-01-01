@@ -5,17 +5,24 @@
 
 #include "../src/Board.hpp"
 
-using namespace WayOutPlayer;
+using namespace WayoutPlayer;
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
-  const auto boardString = "..###\n.....\n#....\n####.\n.#...";
+  const auto boardString = "N0 V1 N0\nN1 N1 N1\nN0 N1 N0\nT1 H1 T1";
+  const auto board = Board::fromString(boardString);
+  BOOST_CHECK(board.toString() == boardString);
+}
+
+BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
+  const auto boardString = "N0    N0\nN1 N1 N1\n   N1   \nT1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
-  const auto boardString = ".....\n..#..\n.###.\n..#..\n.....";
+  // const auto boardString = ".....\n..#..\n.###.\n..#..\n.....";
+  const auto boardString = "N0 N1 N0\nN1 N1 N1\nN0 N1 N0";
   const auto boardSolution = Board::fromString(boardString).findOptimalSolution();
-  const auto center = Position{2, 2};
+  const auto center = Position{1, 1};
   BOOST_CHECK(boardSolution == std::vector<Position>{center});
 }

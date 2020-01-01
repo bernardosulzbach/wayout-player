@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace WayOutPlayer {
+namespace WayoutPlayer {
 class Position {
 public:
   S32 i = 0;
@@ -16,4 +16,4 @@ public:
 
   [[nodiscard]] std::string toString(std::size_t width = 0) const;
 };
-} // namespace WayOutPlayer
+} // namespace WayoutPlayer

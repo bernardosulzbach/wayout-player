@@ -6,7 +6,7 @@
 #include <queue>
 #include <unordered_set>
 
-namespace WayOutPlayer {
+namespace WayoutPlayer {
 S32 Board::getRowCount() const {
   return static_cast<S32>(matrix.size());
 }
@@ -15,13 +15,20 @@ S32 Board::getColumnCount() const {
   return static_cast<S32>(matrix.front().size());
 }
 
-void Board::safeInvert(S32 i, S32 j) {
-  if (i >= 0 && i < getRowCount() && j >= 0 && j < getColumnCount()) {
-    matrix[i][j] = !matrix[i][j];
+void Board::safeInvert(S32 i, S32 j, bool clicked) {
+  if (!hasTile(i, j)) {
+    return;
+  }
+  if (matrix[i][j]->type == TileType::Tap) {
+    if (clicked) {
+      matrix[i][j]->up = !matrix[i][j]->up;
+    }
+  } else {
+    matrix[i][j]->up = !matrix[i][j]->up;
   }
 }
 
-Board::Board(std::vector<std::vector<bool>> booleanMatrix) : matrix(std::move(booleanMatrix)) {
+Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(std::move(tileMatrix)) {
   const auto firstRowSize = matrix.front().size();
   for (const auto &row : matrix) {
     if (row.size() != firstRowSize) {
@@ -30,11 +37,21 @@ Board::Board(std::vector<std::vector<bool>> booleanMatrix) : matrix(std::move(bo
   }
 }
 
+[[nodiscard]] bool Board::hasTile(S32 i, S32 j) const {
+  return i >= 0 && i < getRowCount() && j >= 0 && j < getColumnCount() && matrix[i][j].has_value();
+}
+
+[[nodiscard]] Tile Board::getTile(S32 i, S32 j) const {
+  return matrix[i][j].value();
+}
+
 bool Board::isSolved() const {
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
-      if (matrix[i][j]) {
-        return false;
+      if (hasTile(i, j)) {
+        if (matrix[i][j]->up) {
+          return false;
+        }
       }
     }
   }
@@ -42,14 +59,30 @@ bool Board::isSolved() const {
 }
 
 void Board::activate(S32 i, S32 j) {
-  safeInvert(i - 1, j);
-  safeInvert(i, j - 1);
-  safeInvert(i, j);
-  safeInvert(i, j + 1);
-  safeInvert(i + 1, j);
+  if (hasTile(i, j)) {
+    const auto tile = getTile(i, j);
+    safeInvert(i, j, true);
+    if (tile.type == TileType::Normal) {
+      safeInvert(i - 1, j);
+      safeInvert(i, j - 1);
+      safeInvert(i, j + 1);
+      safeInvert(i + 1, j);
+    } else if (tile.type == TileType::Horizontal) {
+      safeInvert(i, j - 1);
+      safeInvert(i, j + 1);
+    } else if (tile.type == TileType::Vertical) {
+      safeInvert(i - 1, j);
+      safeInvert(i + 1, j);
+    } else if (tile.type == TileType::Tap) {
+      safeInvert(i - 1, j);
+      safeInvert(i, j - 1);
+      safeInvert(i, j + 1);
+      safeInvert(i + 1, j);
+    }
+  }
 }
 
-std::vector<Position> Board::findOptimalSolution(bool flipOnlyTrue) const {
+std::vector<Position> Board::findOptimalSolution(bool flipOnlyUp) const {
   struct State {
     Board board;
     std::vector<std::vector<bool>> clicked;
@@ -96,8 +129,8 @@ std::vector<Position> Board::findOptimalSolution(bool flipOnlyTrue) const {
         if (state.clicked[i][j]) {
           continue;
         }
-        if (flipOnlyTrue) {
-          if (!state.board.matrix[i][j]) {
+        if (flipOnlyUp) {
+          if (!hasTile(i, j) || !state.board.matrix[i][j]->up) {
             continue;
           }
         }
@@ -118,7 +151,9 @@ std::size_t Board::hash() const {
   std::size_t seed = 0;
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
-      boost::hash_combine(seed, matrix[i][j]);
+      if (hasTile(i, j)) {
+        boost::hash_combine(seed, matrix[i][j]->up);
+      }
     }
   }
   return seed;
@@ -133,16 +168,21 @@ bool Board::operator!=(const Board &rhs) const {
 }
 
 std::string Board::toString() const {
+  const auto rowCount = getRowCount();
+  const auto columnCount = getColumnCount();
   std::string board;
-  for (S32 i = 0; i < getRowCount(); i++) {
-    for (S32 j = 0; j < getColumnCount(); j++) {
-      if (matrix[i][j]) {
-        board += '#';
+  for (S32 i = 0; i < rowCount; i++) {
+    for (S32 j = 0; j < columnCount; j++) {
+      if (hasTile(i, j)) {
+        board += matrix[i][j]->toString();
       } else {
-        board += '.';
+        board += "  ";
+      }
+      if (j + 1 < columnCount) {
+        board += ' ';
       }
     }
-    if (i + 1 < getRowCount()) {
+    if (i + 1 < rowCount) {
       board += '\n';
     }
   }
@@ -150,19 +190,38 @@ std::string Board::toString() const {
 }
 
 Board Board::fromString(const std::string &string) {
-  std::vector<std::vector<bool>> matrix(1);
-  for (const auto c : string) {
-    if (c == '.') {
-      matrix.back().push_back(false);
-    } else if (c == '#') {
-      matrix.back().push_back(true);
-    } else if (c == '\n') {
-      matrix.emplace_back();
+  std::vector<std::vector<std::optional<Tile>>> matrix(1);
+  auto atNextTile = true;
+  for (std::size_t i = 0; i < string.size(); i++) {
+    const auto character = string[i];
+    if (atNextTile) {
+      if (isalpha(character)) {
+        matrix.back().emplace_back(Tile(false, tileTypeFromCharacter(character)));
+        atNextTile = false;
+      } else if (character == ' ') {
+        matrix.back().push_back(std::nullopt);
+        atNextTile = false;
+        i++;
+      } else {
+        throw std::invalid_argument("Found an unexpected start of tile: " + std::string(1, character) + ".");
+      }
     } else {
-      const auto message = "String has an invalid character: '" + std::string(1, c) + "'.";
-      throw std::invalid_argument(message);
+      if (isdigit(character)) {
+        matrix.back().back()->up = character == '1';
+      } else if (character == '\n') {
+        matrix.emplace_back();
+        atNextTile = true;
+      } else if (character == ' ') {
+        atNextTile = true;
+      } else {
+        const auto message = "String has an invalid character: '" + std::string(1, character) + "'.";
+        throw std::invalid_argument(message);
+      }
     }
+  }
+  while (matrix.back().empty()) {
+    matrix.pop_back();
   }
   return Board(matrix);
 }
-} // namespace WayOutPlayer
+} // namespace WayoutPlayer
