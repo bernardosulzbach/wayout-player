@@ -2,12 +2,16 @@
 
 #include "Position.hpp"
 
+#include <optional>
 #include <vector>
 
 namespace WayoutPlayer {
 class Solution {
   std::vector<Position> clicks;
   bool optimal;
+
+  std::optional<U64> exploredNodes;
+  std::optional<U64> distinctNodes;
 
 public:
   Solution(std::vector<Position> clickVector, bool isOptimal);
@@ -20,6 +24,14 @@ public:
 
   bool operator!=(const Solution &rhs) const;
 
+  [[nodiscard]] const std::optional<U64> &getExploredNodes() const;
+  void setExploredNodes(U64 newExploredNodes);
+
+  [[nodiscard]] const std::optional<U64> &getDistinctNodes() const;
+  void setDistinctNodes(U64 newDistinctNodes);
+
   [[nodiscard]] std::string toString() const;
+
+  [[nodiscard]] std::string getStatisticsString() const;
 };
 } // namespace WayoutPlayer

@@ -35,7 +35,7 @@ public:
 
   void activate(S32 i, S32 j);
 
-  [[nodiscard]] Solution findOptimalSolution(bool flipOnlyUp = false) const;
+  [[nodiscard]] Solution findSolution(bool flipOnlyUp = false) const;
 
   [[nodiscard]] std::size_t hash() const;
 

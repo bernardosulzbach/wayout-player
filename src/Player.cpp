@@ -13,7 +13,9 @@ int main(int argc, char **argv) {
     const auto boardString = readFile(argumentParser.getArgument(1));
     const auto board = Board::fromString(boardString);
     std::cout << board.toString() << '\n';
-    std::cout << board.findOptimalSolution().toString() << '\n';
+    const auto solution = board.findSolution();
+    std::cout << solution.toString() << '\n';
+    std::cout << solution.getStatisticsString() << '\n';
   } catch (std::exception &exception) {
     std::cout << "Threw an exception." << '\n';
     std::cout << "  " << exception.what() << '\n';

@@ -77,7 +77,10 @@ void Board::activate(S32 i, S32 j) {
   }
 }
 
-Solution Board::findOptimalSolution(bool flipOnlyUp) const {
+Solution Board::findSolution(bool flipOnlyUp) const {
+  if (isSolved()) {
+    return Solution({}, true);
+  }
   struct State {
     Board board;
     std::vector<std::vector<bool>> clicked;
@@ -105,6 +108,7 @@ Solution Board::findOptimalSolution(bool flipOnlyUp) const {
   stateQueue.push({*this, std::vector<std::vector<bool>>(n, std::vector<bool>(m))});
   std::unordered_set<Board, Hash> seenBoards;
   seenBoards.insert(*this);
+  U64 exploredNodes = 0;
   while (!stateQueue.empty()) {
     if (stateQueue.size() > MaximumStateQueueSize) {
       const auto limitString = std::to_string(MaximumStateQueueSize);
@@ -116,9 +120,7 @@ Solution Board::findOptimalSolution(bool flipOnlyUp) const {
     }
     const auto state = stateQueue.front();
     stateQueue.pop();
-    if (state.board.isSolved()) {
-      return Solution(state.getClickPositionVector(), !flipOnlyUp);
-    }
+    exploredNodes++;
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {
         if (state.clicked[i][j]) {
@@ -132,6 +134,12 @@ Solution Board::findOptimalSolution(bool flipOnlyUp) const {
         auto derivedState = state;
         derivedState.board.activate(i, j);
         derivedState.clicked[i][j] = true;
+        if (derivedState.board.isSolved()) {
+          auto solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
+          solution.setExploredNodes(exploredNodes);
+          solution.setDistinctNodes(seenBoards.size());
+          return solution;
+        }
         if (seenBoards.count(derivedState.board) == 0) {
           stateQueue.push(derivedState);
           seenBoards.insert(derivedState.board);
