@@ -1,5 +1,7 @@
 #include "Solution.hpp"
 
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 namespace WayoutPlayer {
@@ -39,6 +41,14 @@ void Solution::setDistinctNodes(const U64 newDistinctNodes) {
   distinctNodes = newDistinctNodes;
 }
 
+const std::optional<F64> &Solution::getMeanBranchingFactor() const {
+  return meanBranchingFactor;
+}
+
+void Solution::setMeanBranchingFactor(const F64 newMeanBranchingFactor) {
+  meanBranchingFactor = newMeanBranchingFactor;
+}
+
 std::string Solution::toString() const {
   std::string string;
   if (isOptimal()) {
@@ -66,6 +76,14 @@ std::string Solution::getStatisticsString() const {
       string += '\n';
     }
     string += "Distinct nodes found: " + std::to_string(getDistinctNodes().value());
+  }
+  if (getMeanBranchingFactor()) {
+    if (!string.empty()) {
+      string += '\n';
+    }
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2) << getMeanBranchingFactor().value();
+    string += "Mean branching factor: " + stream.str();
   }
   return string;
 }

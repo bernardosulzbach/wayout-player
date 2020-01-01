@@ -109,6 +109,8 @@ Solution Board::findSolution(bool flipOnlyUp) const {
   std::unordered_set<Board, Hash> seenBoards;
   seenBoards.insert(*this);
   U64 exploredNodes = 0;
+  U64 discoveredNodes = 0;
+  std::optional<Solution> solution;
   while (!stateQueue.empty()) {
     if (stateQueue.size() > MaximumStateQueueSize) {
       const auto limitString = std::to_string(MaximumStateQueueSize);
@@ -120,34 +122,41 @@ Solution Board::findSolution(bool flipOnlyUp) const {
     }
     const auto state = stateQueue.front();
     stateQueue.pop();
-    exploredNodes++;
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {
         if (state.clicked[i][j]) {
           continue;
         }
+        if (!hasTile(i, j)) {
+          continue;
+        }
         if (flipOnlyUp) {
-          if (!hasTile(i, j) || !state.board.matrix[i][j]->up) {
+          if (!state.board.matrix[i][j]->up) {
             continue;
           }
         }
         auto derivedState = state;
         derivedState.board.activate(i, j);
         derivedState.clicked[i][j] = true;
-        if (derivedState.board.isSolved()) {
-          auto solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
-          solution.setExploredNodes(exploredNodes);
-          solution.setDistinctNodes(seenBoards.size());
-          return solution;
+        if (!solution && derivedState.board.isSolved()) {
+          solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
         }
         if (seenBoards.count(derivedState.board) == 0) {
           stateQueue.push(derivedState);
           seenBoards.insert(derivedState.board);
+          discoveredNodes++;
         }
       }
     }
+    exploredNodes++;
+    if (solution) {
+      solution->setExploredNodes(exploredNodes);
+      solution->setDistinctNodes(seenBoards.size());
+      solution->setMeanBranchingFactor(static_cast<F64>(discoveredNodes) / exploredNodes);
+      return solution.value();
+    }
   }
-  throw std::runtime_error("Could not find a solution, which should be impossible.");
+  throw std::runtime_error("Could not find a solution.");
 }
 
 std::size_t Board::hash() const {
