@@ -35,6 +35,8 @@ set(Boost_USE_MULTITHREADED ON)
 add_library(wayout-player OBJECT
             src/ArgumentParser.cpp
             src/ArgumentParser.hpp
+            src/SystemInformation.cpp
+            src/SystemInformation.hpp
             src/Board.cpp
             src/Board.hpp
             src/Types.hpp
