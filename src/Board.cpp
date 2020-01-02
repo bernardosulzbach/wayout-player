@@ -1,6 +1,6 @@
 #include "Board.hpp"
 
-#include <boost/container_hash/hash.hpp>
+#include <boost/functional/hash.hpp>
 
 #include <queue>
 #include <unordered_set>
