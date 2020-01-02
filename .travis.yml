@@ -1,4 +1,5 @@
 dist: bionic
+language: cpp
 
 compiler:
   - clang
@@ -7,6 +8,7 @@ compiler:
 addons:
   apt:
     packages:
+      - build-essential
       - cmake
       - libboost-all-dev
 
