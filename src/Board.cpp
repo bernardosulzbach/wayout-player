@@ -2,7 +2,6 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include <iostream>
 #include <queue>
 #include <unordered_set>
 
@@ -104,12 +103,27 @@ Solution Board::findSolution(bool flipOnlyUp) const {
       return board.hash();
     }
   };
-  std::queue<State> stateQueue;
-  stateQueue.push({*this, std::vector<std::vector<bool>>(n, std::vector<bool>(m))});
-  std::unordered_set<Board, Hash> seenBoards;
-  seenBoards.insert(*this);
   U64 exploredNodes = 0;
   U64 discoveredNodes = 0;
+  State initialState{*this, std::vector<std::vector<bool>>(n, std::vector<bool>(m))};
+  std::unordered_set<Board, Hash> seenBoards;
+  seenBoards.insert(initialState.board);
+  for (S32 i = 0; i < n; i++) {
+    for (S32 j = 0; j < m; j++) {
+      if (hasTile(i, j) && getTile(i, j).type == TileType::Tap && getTile(i, j).up) {
+        initialState.board.activate(i, j);
+        initialState.clicked[i][j] = true;
+        exploredNodes++;
+        seenBoards.insert(initialState.board);
+        discoveredNodes++;
+      }
+    }
+  }
+  if (initialState.board.isSolved()) {
+    return Solution(initialState.getClickPositionVector(), true);
+  }
+  std::queue<State> stateQueue;
+  stateQueue.push(initialState);
   std::optional<Solution> solution;
   while (!stateQueue.empty()) {
     if (stateQueue.size() > MaximumStateQueueSize) {
@@ -128,6 +142,12 @@ Solution Board::findSolution(bool flipOnlyUp) const {
           continue;
         }
         if (!hasTile(i, j)) {
+          continue;
+        }
+        if (getTile(i, j).type == TileType::Tap) {
+          if (getTile(i, j).up) {
+            throw std::runtime_error("Should not have up taps during search.");
+          }
           continue;
         }
         if (flipOnlyUp) {

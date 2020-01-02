@@ -7,6 +7,11 @@
 
 using namespace WayoutPlayer;
 
+void informAboutException(const std::exception &exception) {
+  std::cout << "Threw an exception." << '\n';
+  std::cout << "  " << exception.what() << '\n';
+}
+
 int main(int argc, char **argv) {
   try {
     ArgumentParser argumentParser;
@@ -17,11 +22,14 @@ int main(int argc, char **argv) {
     const auto solution = board.findSolution();
     std::cout << solution.toString() << '\n';
     std::cout << solution.getStatisticsString() << '\n';
+  } catch (const std::exception &exception) {
+    informAboutException(exception);
+  }
+  try {
     SystemInformation systemInformation;
     std::cout << "Used up to " << systemInformation.getMaximumResidentSetSizeAsHumanReadableString() << "." << '\n';
-  } catch (std::exception &exception) {
-    std::cout << "Threw an exception." << '\n';
-    std::cout << "  " << exception.what() << '\n';
+  } catch (const std::exception &exception) {
+    informAboutException(exception);
   }
   return 0;
 }
