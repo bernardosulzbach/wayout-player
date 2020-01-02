@@ -1,0 +1,13 @@
+dist: bionic
+
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - libboost-all-dev
+
+script: mkdir build && cd build && cmake .. && make && ./test
