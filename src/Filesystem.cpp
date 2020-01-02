@@ -1,11 +1,12 @@
 #include "Filesystem.hpp"
 
 #include <fstream>
+#include <sstream>
 
 namespace WayoutPlayer {
-std::string readFile(const std::filesystem::path &path) {
+std::string readFile(const std::string &path) {
   std::ostringstream buffer;
-  std::ifstream input(path.native());
+  std::ifstream input(path);
   buffer << input.rdbuf();
   return buffer.str();
 }
