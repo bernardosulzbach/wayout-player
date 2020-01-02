@@ -8,3 +8,7 @@ An automated player for the [Wayout](https://store.steampowered.com/app/551110/W
 # The following line limits the memory usage to 1 GiB on Linux.
 systemd-run --scope -p MemoryMax=1G ./player ../input/Ж.txt
 ```
+
+# License
+
+The code is licensed under the [BSD 3-Clause "New" or "Revised" License](LICENSE).
