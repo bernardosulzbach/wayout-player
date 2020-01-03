@@ -10,11 +10,6 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-Wall)
   add_definitions(-Wextra)
   add_definitions(-Wshadow)
-endif()
-
-add_definitions(-Werror)
-
-if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-DDEBUGGING)
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
@@ -23,6 +18,14 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
       "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
   )
 endif()
+
+add_definitions(-Werror)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT
+                    HAS_IPO_SUPPORT
+                    OUTPUT
+                    IPO_ERROR)
 
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIR})
@@ -60,3 +63,10 @@ target_link_libraries(test ${CMAKE_THREAD_LIBS_INIT})
 add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
 target_link_libraries(player ${Boost_LIBRARIES})
 target_link_libraries(player ${CMAKE_THREAD_LIBS_INIT})
+
+if(HAS_IPO_SUPPORT)
+  message(STATUS "IPO enabled")
+  set_property(TARGET player PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+  message(STATUS "IPO not supported: <${IPO_ERROR}>")
+endif()
