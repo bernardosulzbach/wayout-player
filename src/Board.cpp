@@ -186,6 +186,7 @@ Solution Board::findSolution(bool flipOnlyUp) const {
     }
     const auto state = stateQueue.front();
     stateQueue.pop();
+    auto derivedState = state;
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {
         if (!state.board.hasTile(i, j)) {
@@ -208,7 +209,7 @@ Solution Board::findSolution(bool flipOnlyUp) const {
             continue;
           }
         }
-        auto derivedState = state;
+        derivedState.board = state.board;
         derivedState.board.activate(i, j);
         derivedState.click(i, j);
         if (!solution && derivedState.board.isSolved()) {
@@ -219,6 +220,7 @@ Solution Board::findSolution(bool flipOnlyUp) const {
           seenBoards.insert(derivedState.board);
           discoveredNodes++;
         }
+        derivedState.clicked[i][j] = false;
       }
     }
     exploredNodes++;
