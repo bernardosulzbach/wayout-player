@@ -1,4 +1,5 @@
 #include "Solution.hpp"
+#include "Text.hpp"
 
 #include <iomanip>
 #include <sstream>
@@ -69,13 +70,13 @@ std::string Solution::toString() const {
 std::string Solution::getStatisticsString() const {
   std::string string;
   if (getExploredNodes()) {
-    string += "Explored nodes: " + std::to_string(getExploredNodes().value());
+    string += "Explored nodes: " + integerToStringWithThousandSeparators(getExploredNodes().value());
   }
   if (getDistinctNodes()) {
     if (!string.empty()) {
       string += '\n';
     }
-    string += "Distinct nodes found: " + std::to_string(getDistinctNodes().value());
+    string += "Distinct nodes found: " + integerToStringWithThousandSeparators(getDistinctNodes().value());
   }
   if (getMeanBranchingFactor()) {
     if (!string.empty()) {

@@ -16,40 +16,39 @@ add_definitions(-Werror)
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-DDEBUGGING)
-  set(
-    CMAKE_CXX_FLAGS
-
-    "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
-    )
-  set(
-    CMAKE_EXE_LINKER_FLAGS_DEBUG
-
-    "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
-    )
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
+  )
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG
+      "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
+  )
 endif()
 
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIR})
 set(Boost_USE_MULTITHREADED ON)
 
-add_library(wayout-player OBJECT
-            src/ArgumentParser.cpp
-            src/ArgumentParser.hpp
-            src/SystemInformation.cpp
-            src/SystemInformation.hpp
-            src/Board.cpp
-            src/Board.hpp
-            src/Types.hpp
-            src/Position.cpp
-            src/Position.hpp
-            src/Tile.cpp
-            src/Tile.hpp
-            src/TileType.cpp
-            src/TileType.hpp
-            src/Filesystem.cpp
-            src/Filesystem.hpp
-            src/Solution.cpp
-            src/Solution.hpp)
+add_library(
+  wayout-player OBJECT
+  src/ArgumentParser.cpp
+  src/ArgumentParser.hpp
+  src/SystemInformation.cpp
+  src/SystemInformation.hpp
+  src/Board.cpp
+  src/Board.hpp
+  src/Types.hpp
+  src/Position.cpp
+  src/Position.hpp
+  src/Tile.cpp
+  src/Tile.hpp
+  src/Text.cpp
+  src/Text.hpp
+  src/TileType.cpp
+  src/TileType.hpp
+  src/Filesystem.cpp
+  src/Filesystem.hpp
+  src/Solution.cpp
+  src/Solution.hpp)
 
 find_package(Threads REQUIRED)
 

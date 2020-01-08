@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   }
   try {
     SystemInformation systemInformation;
-    std::cout << "Used up to " << systemInformation.getMaximumResidentSetSizeAsHumanReadableString() << "." << '\n';
+    std::cout << "Used " << systemInformation.getMaximumResidentSetSizeAsHumanReadableString() << " of memory." << '\n';
   } catch (const std::exception &exception) {
     informAboutException(exception);
   }
