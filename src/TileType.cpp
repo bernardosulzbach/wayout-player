@@ -1,12 +1,17 @@
 #include "TileType.hpp"
 
+#include <array>
+
 namespace WayoutPlayer {
 U32 tileTypeToInteger(TileType tileType) {
   return static_cast<U32>(tileType);
 }
 
+constexpr std::array<TileType, 5> TileTypes = {TileType::Normal, TileType::Horizontal, TileType::Vertical,
+                                               TileType::Tap, TileType::Cross};
+
 TileType tileTypeFromInteger(U32 integer) {
-  for (const auto tileType : {TileType::Normal, TileType::Horizontal, TileType::Vertical, TileType::Tap}) {
+  for (const auto tileType : TileTypes) {
     if (tileTypeToInteger(tileType) == integer) {
       return tileType;
     }
@@ -24,12 +29,14 @@ char tileTypeToCharacter(TileType tileType) {
     return 'V';
   case TileType::Tap:
     return 'T';
+  case TileType::Cross:
+    return 'C';
   }
   throw std::invalid_argument("Should not be reachable.");
 }
 
 TileType tileTypeFromCharacter(char character) {
-  for (const auto tileType : {TileType::Normal, TileType::Horizontal, TileType::Vertical, TileType::Tap}) {
+  for (const auto tileType : TileTypes) {
     if (tileTypeToCharacter(tileType) == character) {
       return tileType;
     }

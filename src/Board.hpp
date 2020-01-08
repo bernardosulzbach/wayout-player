@@ -22,7 +22,7 @@ class Board {
 
   [[nodiscard]] S32 getColumnCount() const;
 
-  void safeInvert(S32 i, S32 j, bool clicked = false);
+  void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked = false);
 
 public:
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);

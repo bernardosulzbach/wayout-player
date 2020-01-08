@@ -14,16 +14,30 @@ S32 Board::getColumnCount() const {
   return static_cast<S32>(matrix.front().size());
 }
 
-void Board::safeInvert(S32 i, S32 j, bool clicked) {
+void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked) {
   if (!hasTile(i, j)) {
     return;
   }
   if (matrix[i][j]->type == TileType::Tap) {
     if (clicked) {
       matrix[i][j]->up = !matrix[i][j]->up;
+      inversions.push_back({i, j});
     }
+  } else if (matrix[i][j]->type == TileType::Cross) {
+    matrix[i][j]->up = !matrix[i][j]->up;
+    inversions.push_back({i, j});
+    const auto propagate = [this, &inversions](S32 ni, S32 nj) {
+      if (std::find(std::begin(inversions), std::end(inversions), Position{ni, nj}) == std::end(inversions)) {
+        safeInvert(ni, nj, inversions);
+      }
+    };
+    propagate(i - 1, j);
+    propagate(i, j - 1);
+    propagate(i, j + 1);
+    propagate(i + 1, j);
   } else {
     matrix[i][j]->up = !matrix[i][j]->up;
+    inversions.push_back({i, j});
   }
 }
 
@@ -58,20 +72,21 @@ bool Board::isSolved() const {
 }
 
 void Board::activate(S32 i, S32 j) {
+  std::vector<Position> inversions;
   if (hasTile(i, j)) {
     const auto tile = getTile(i, j);
-    safeInvert(i, j, true);
-    if (tile.type == TileType::Normal || tile.type == TileType::Tap) {
-      safeInvert(i - 1, j);
-      safeInvert(i, j - 1);
-      safeInvert(i, j + 1);
-      safeInvert(i + 1, j);
+    safeInvert(i, j, inversions, true);
+    if (tile.type == TileType::Normal || tile.type == TileType::Tap || tile.type == TileType::Cross) {
+      safeInvert(i - 1, j, inversions);
+      safeInvert(i, j - 1, inversions);
+      safeInvert(i, j + 1, inversions);
+      safeInvert(i + 1, j, inversions);
     } else if (tile.type == TileType::Horizontal) {
-      safeInvert(i, j - 1);
-      safeInvert(i, j + 1);
+      safeInvert(i, j - 1, inversions);
+      safeInvert(i, j + 1, inversions);
     } else if (tile.type == TileType::Vertical) {
-      safeInvert(i - 1, j);
-      safeInvert(i + 1, j);
+      safeInvert(i - 1, j, inversions);
+      safeInvert(i + 1, j, inversions);
     }
   }
 }
