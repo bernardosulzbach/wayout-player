@@ -17,10 +17,13 @@ class Board {
   constexpr static std::size_t MaximumStateQueueSize = 1u << 22u;
 
   std::vector<std::vector<std::optional<Tile>>> matrix;
+  bool startedWithBlockedTiles = false;
 
   [[nodiscard]] S32 getRowCount() const;
 
   [[nodiscard]] S32 getColumnCount() const;
+
+  [[nodiscard]] bool mayNeedMultipleClicks() const;
 
   void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked = false);
 

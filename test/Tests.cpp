@@ -8,27 +8,35 @@
 using namespace WayoutPlayer;
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
-  const auto boardString = "N0 V1 N0\nN1 N1 N1\nN0 N1 N0\nT1 H1 T1";
+  const auto boardString = "D0 V1 D0\nD1 D1 D1\nD0 D1 D0\nT1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
-  const auto boardString = "N0    N0\nN1 N1 N1\n   N1   \nT1 H1 T1";
+  const auto boardString = "D0    D0\nD1 D1 D1\n   D1   \nT1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
-  const auto boardString = "N0 N1 N0\nN1 N1 N1\nN0 N1 N0";
+  const auto boardString = "D0 D1 D0\nD1 D1 D1\nD0 D1 D0";
   const auto boardSolution = Board::fromString(boardString).findSolution();
   const auto expectedSolution = Solution({Position{1, 1}}, true);
   BOOST_CHECK(boardSolution == expectedSolution);
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTestWithTaps) {
-  const auto boardString = "N0 N1 N0\nN1 T1 N1\nN0 N1 N0";
+  const auto boardString = "D0 D1 D0\nD1 T1 D1\nD0 D1 D0";
   const auto boardSolution = Board::fromString(boardString).findSolution();
   const auto expectedSolution = Solution({Position{1, 1}}, true);
   BOOST_CHECK(boardSolution == expectedSolution);
+}
+
+BOOST_AUTO_TEST_CASE(boardsShouldBeDifferentIfTheirTilesAreNotBlocked) {
+  const auto boardAString = "B1";
+  const auto boardBString = "D1";
+  const auto boardA = Board::fromString(boardAString);
+  const auto boardB = Board::fromString(boardBString);
+  BOOST_CHECK(boardA != boardB);
 }

@@ -7,8 +7,8 @@ U32 tileTypeToInteger(TileType tileType) {
   return static_cast<U32>(tileType);
 }
 
-constexpr std::array<TileType, 5> TileTypes = {TileType::Normal, TileType::Horizontal, TileType::Vertical,
-                                               TileType::Tap, TileType::Cross};
+constexpr std::array<TileType, 6> TileTypes = {TileType::Default, TileType::Horizontal, TileType::Vertical,
+                                               TileType::Tap,     TileType::Blocked,    TileType::Chain};
 
 TileType tileTypeFromInteger(U32 integer) {
   for (const auto tileType : TileTypes) {
@@ -21,15 +21,17 @@ TileType tileTypeFromInteger(U32 integer) {
 
 char tileTypeToCharacter(TileType tileType) {
   switch (tileType) {
-  case TileType::Normal:
-    return 'N';
+  case TileType::Default:
+    return 'D';
   case TileType::Horizontal:
     return 'H';
   case TileType::Vertical:
     return 'V';
   case TileType::Tap:
     return 'T';
-  case TileType::Cross:
+  case TileType::Blocked:
+    return 'B';
+  case TileType::Chain:
     return 'C';
   }
   throw std::invalid_argument("Should not be reachable.");

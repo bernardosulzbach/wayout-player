@@ -53,14 +53,14 @@ void Solution::setMeanBranchingFactor(const F64 newMeanBranchingFactor) {
 std::string Solution::toString() const {
   std::string string;
   if (isOptimal()) {
-    string += "Optimal solution:";
+    string += "Found an optimal solution:";
   } else {
-    string += "Solution:";
+    string += "Found a solution:";
   }
   string += '\n';
   for (const auto click : clicks) {
-    string += ' ';
-    string += click.toString(2);
+    string += "  ";
+    string += click.toString();
     string += '\n';
   }
   string.pop_back();

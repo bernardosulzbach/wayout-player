@@ -1,0 +1,9 @@
+D0 D1 D0 V1 D0 T1
+D0 T1 D0 H1 D1 D0
+V0 D1       T1 V0
+D0 V0       D0 H0
+T1 D0 D0 D0 H0 D1
+D0 H1 D0 T1 D0 H1
+Threw an exception.
+  State queue size exceeded the limit of 4194304.
+Used 9 GiB of memory.

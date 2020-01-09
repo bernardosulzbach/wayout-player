@@ -1,0 +1,9 @@
+B1 D0
+D0 B1
+Found an optimal solution:
+  (0, 1)
+  (0, 1)
+Explored nodes: 2
+Distinct nodes found: 7
+Mean branching factor: 3.00
+Used 6 MiB of memory.

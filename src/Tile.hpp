@@ -8,7 +8,7 @@ namespace WayoutPlayer {
 class Tile {
 public:
   bool up = false;
-  TileType type = TileType::Normal;
+  TileType type = TileType::Default;
 
   Tile(bool up, TileType type);
   [[nodiscard]] std::string toString() const;

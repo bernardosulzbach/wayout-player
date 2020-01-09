@@ -14,6 +14,10 @@ S32 Board::getColumnCount() const {
   return static_cast<S32>(matrix.front().size());
 }
 
+bool Board::mayNeedMultipleClicks() const {
+  return startedWithBlockedTiles;
+}
+
 void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked) {
   if (!hasTile(i, j)) {
     return;
@@ -23,7 +27,12 @@ void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool cli
       matrix[i][j]->up = !matrix[i][j]->up;
       inversions.push_back({i, j});
     }
-  } else if (matrix[i][j]->type == TileType::Cross) {
+  } else if (matrix[i][j]->type == TileType::Blocked) {
+    if (clicked) {
+      throw std::runtime_error("Cannot click on a blocked tile.");
+    }
+    matrix[i][j]->type = TileType::Default;
+  } else if (matrix[i][j]->type == TileType::Chain) {
     matrix[i][j]->up = !matrix[i][j]->up;
     inversions.push_back({i, j});
     const auto propagate = [this, &inversions](S32 ni, S32 nj) {
@@ -46,6 +55,11 @@ Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(
   for (const auto &row : matrix) {
     if (row.size() != firstRowSize) {
       throw std::invalid_argument("Matrix is not rectangular.");
+    }
+    for (const auto tile : row) {
+      if (tile && tile->type == TileType::Blocked) {
+        startedWithBlockedTiles = true;
+      }
     }
   }
 }
@@ -76,7 +90,7 @@ void Board::activate(S32 i, S32 j) {
   if (hasTile(i, j)) {
     const auto tile = getTile(i, j);
     safeInvert(i, j, inversions, true);
-    if (tile.type == TileType::Normal || tile.type == TileType::Tap || tile.type == TileType::Cross) {
+    if (tile.type == TileType::Default || tile.type == TileType::Tap || tile.type == TileType::Chain) {
       safeInvert(i - 1, j, inversions);
       safeInvert(i, j - 1, inversions);
       safeInvert(i, j + 1, inversions);
@@ -87,6 +101,8 @@ void Board::activate(S32 i, S32 j) {
     } else if (tile.type == TileType::Vertical) {
       safeInvert(i - 1, j, inversions);
       safeInvert(i + 1, j, inversions);
+    } else if (tile.type == TileType::Blocked) {
+      throw std::runtime_error("Cannot activate a blocked tile.");
     }
   }
 }
@@ -97,18 +113,18 @@ Solution Board::findSolution(bool flipOnlyUp) const {
   }
   struct State {
     Board board;
-    std::vector<std::vector<bool>> clicked;
+    std::vector<Position> clicked;
+
+    void click(S32 i, S32 j) {
+      return clicked.push_back({i, j});
+    }
+
+    [[nodiscard]] bool hasClicked(S32 i, S32 j) const {
+      return std::find(std::begin(clicked), std::end(clicked), Position{i, j}) != std::end(clicked);
+    }
 
     [[nodiscard]] std::vector<Position> getClickPositionVector() const {
-      std::vector<Position> positions;
-      for (S32 i = 0; i < board.getRowCount(); i++) {
-        for (S32 j = 0; j < board.getColumnCount(); j++) {
-          if (clicked[i][j]) {
-            positions.push_back({i, j});
-          }
-        }
-      }
-      return positions;
+      return clicked;
     }
   };
   const auto n = getRowCount();
@@ -120,14 +136,14 @@ Solution Board::findSolution(bool flipOnlyUp) const {
   };
   U64 exploredNodes = 0;
   U64 discoveredNodes = 0;
-  State initialState{*this, std::vector<std::vector<bool>>(n, std::vector<bool>(m))};
+  State initialState{*this, {}};
   std::unordered_set<Board, Hash> seenBoards;
   seenBoards.insert(initialState.board);
   for (S32 i = 0; i < n; i++) {
     for (S32 j = 0; j < m; j++) {
       if (hasTile(i, j) && getTile(i, j).type == TileType::Tap && getTile(i, j).up) {
         initialState.board.activate(i, j);
-        initialState.clicked[i][j] = true;
+        initialState.click(i, j);
         exploredNodes++;
         seenBoards.insert(initialState.board);
         discoveredNodes++;
@@ -153,26 +169,29 @@ Solution Board::findSolution(bool flipOnlyUp) const {
     stateQueue.pop();
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {
-        if (state.clicked[i][j]) {
+        if (!state.board.hasTile(i, j)) {
           continue;
         }
-        if (!hasTile(i, j)) {
+        if (!mayNeedMultipleClicks() && state.hasClicked(i, j)) {
           continue;
         }
-        if (getTile(i, j).type == TileType::Tap) {
-          if (getTile(i, j).up) {
+        if (state.board.getTile(i, j).type == TileType::Tap) {
+          if (state.board.getTile(i, j).up) {
             throw std::runtime_error("Should not have up taps during search.");
           }
           continue;
         }
+        if (state.board.getTile(i, j).type == TileType::Blocked) {
+          continue;
+        }
         if (flipOnlyUp) {
-          if (!state.board.matrix[i][j]->up) {
+          if (state.board.getTile(i, j).up) {
             continue;
           }
         }
         auto derivedState = state;
         derivedState.board.activate(i, j);
-        derivedState.clicked[i][j] = true;
+        derivedState.click(i, j);
         if (!solution && derivedState.board.isSolved()) {
           solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
         }
@@ -199,6 +218,7 @@ std::size_t Board::hash() const {
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
       if (hasTile(i, j)) {
+        boost::hash_combine(seed, tileTypeToInteger(matrix[i][j]->type));
         boost::hash_combine(seed, matrix[i][j]->up);
       }
     }
@@ -237,6 +257,9 @@ std::string Board::toString() const {
 }
 
 Board Board::fromString(const std::string &string) {
+  if (string.empty()) {
+    throw std::invalid_argument("Cannot create a board from an empty string.");
+  }
   std::vector<std::vector<std::optional<Tile>>> matrix(1);
   auto atNextTile = true;
   for (std::size_t i = 0; i < string.size(); i++) {

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace WayoutPlayer {
-enum class TileType { Normal, Horizontal, Vertical, Tap, Cross };
+enum class TileType { Default, Horizontal, Vertical, Tap, Blocked, Chain };
 
 U32 tileTypeToInteger(TileType tileType);
 
