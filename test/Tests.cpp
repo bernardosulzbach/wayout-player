@@ -40,3 +40,9 @@ BOOST_AUTO_TEST_CASE(boardsShouldBeDifferentIfTheirTilesAreNotBlocked) {
   const auto boardB = Board::fromString(boardBString);
   BOOST_CHECK(boardA != boardB);
 }
+
+BOOST_AUTO_TEST_CASE(largeDefaultBoardShouldBeSolved) {
+  const auto boardString = "D1 D0 D1 D0 D1\nD0 D1 D1 D0 D0\nD1 D0 D1 D1 D1\nD1 D0 D0 D0 D1\nD0 D1 D0 D0 D0";
+  const auto boardSolution = Board::fromString(boardString).findSolution();
+  BOOST_CHECK(boardSolution.getClicks().size() == 8);
+}

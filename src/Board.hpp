@@ -13,8 +13,8 @@
 
 namespace WayoutPlayer {
 class Board {
-  constexpr static std::size_t MaximumBoardHashTableSize = 1u << 24u;
-  constexpr static std::size_t MaximumStateQueueSize = 1u << 22u;
+  constexpr static std::size_t MaximumBoardHashTableSize = 1u << 30u;
+  constexpr static std::size_t MaximumStateQueueSize = 1u << 30u;
 
   std::vector<std::vector<std::optional<Tile>>> matrix;
   bool startedWithBlockedTiles = false;
