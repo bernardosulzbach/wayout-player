@@ -1,5 +1,7 @@
 # Wayout Player
 
+[![Build Status](https://travis-ci.com/bernardosulzbach/wayout-player.svg?token=BH5q1d6v3PWdPAzWnpKC&branch=master)](https://travis-ci.com/bernardosulzbach/wayout-player)
+
 An automated player for the [Wayout](https://store.steampowered.com/app/551110/Wayout/) game.
 
 ```bash
