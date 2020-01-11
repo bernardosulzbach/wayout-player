@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Types.hpp"
+
 #include <stdexcept>
 
 namespace WayoutPlayer {
-enum class TileType { Default, Horizontal, Vertical, Tap, Blocked, Chain };
+enum class TileType : U8 { Default, Horizontal, Vertical, Tap, Blocked, Chain };
 
 U32 tileTypeToInteger(TileType tileType);
 
