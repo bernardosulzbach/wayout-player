@@ -220,7 +220,7 @@ Solution Board::findSolution(bool flipOnlyUp) const {
           seenBoards.insert(derivedState.board);
           discoveredNodes++;
         }
-        derivedState.clicked[i][j] = false;
+        derivedState.clicked.pop_back();
       }
     }
     exploredNodes++;

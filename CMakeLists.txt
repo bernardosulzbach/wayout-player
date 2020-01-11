@@ -22,10 +22,7 @@ endif()
 add_definitions(-Werror)
 
 include(CheckIPOSupported)
-check_ipo_supported(RESULT
-                    HAS_IPO_SUPPORT
-                    OUTPUT
-                    IPO_ERROR)
+check_ipo_supported(RESULT HAS_IPO_SUPPORT OUTPUT IPO_ERROR)
 
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIR})
