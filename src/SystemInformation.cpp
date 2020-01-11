@@ -1,5 +1,7 @@
 #include "SystemInformation.hpp"
 
+#include "Text.hpp"
+
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -41,7 +43,11 @@ std::string SystemInformation::getMaximumResidentSetSizeAsHumanReadableString() 
     multiple++;
   }
   std::stringstream stream;
+  stream << integerToStringWithThousandSeparators(maximumResidentSetSize) << " B";
+  stream << " ";
+  stream << "(";
   stream << static_cast<U64>(std::ceil(value)) << " " << units[multiple];
+  stream << ")";
   return stream.str();
 }
 } // namespace WayoutPlayer
