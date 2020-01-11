@@ -44,6 +44,21 @@ void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool cli
     propagate(i, j - 1);
     propagate(i, j + 1);
     propagate(i + 1, j);
+  } else if (matrix[i][j]->type == TileType::Twin) {
+    matrix[i][j]->up = !matrix[i][j]->up;
+    // Set all other twins to this state.
+    for (S32 otherI = 0; otherI < getRowCount(); otherI++) {
+      for (S32 otherJ = 0; otherJ < getColumnCount(); otherJ++) {
+        if (otherI == i && otherJ == j) {
+          continue;
+        }
+        if (hasTile(otherI, otherJ)) {
+          if (matrix[otherI][otherJ]->type == TileType::Twin) {
+            matrix[otherI][otherJ]->up = matrix[i][j]->up;
+          }
+        }
+      }
+    }
   } else {
     matrix[i][j]->up = !matrix[i][j]->up;
     inversions.push_back({i, j});
@@ -87,23 +102,27 @@ bool Board::isSolved() const {
 
 void Board::activate(S32 i, S32 j) {
   std::vector<Position> inversions;
-  if (hasTile(i, j)) {
-    const auto tile = getTile(i, j);
-    safeInvert(i, j, inversions, true);
-    if (tile.type == TileType::Default || tile.type == TileType::Tap || tile.type == TileType::Chain) {
-      safeInvert(i - 1, j, inversions);
-      safeInvert(i, j - 1, inversions);
-      safeInvert(i, j + 1, inversions);
-      safeInvert(i + 1, j, inversions);
-    } else if (tile.type == TileType::Horizontal) {
-      safeInvert(i, j - 1, inversions);
-      safeInvert(i, j + 1, inversions);
-    } else if (tile.type == TileType::Vertical) {
-      safeInvert(i - 1, j, inversions);
-      safeInvert(i + 1, j, inversions);
-    } else if (tile.type == TileType::Blocked) {
-      throw std::runtime_error("Cannot activate a blocked tile.");
-    }
+  if (!hasTile(i, j)) {
+    return;
+  }
+  const auto tile = getTile(i, j);
+  const auto type = tile.type;
+  safeInvert(i, j, inversions, true);
+  if (type == TileType::Default || type == TileType::Tap || type == TileType::Chain || type == TileType::Twin) {
+    safeInvert(i - 1, j, inversions);
+    safeInvert(i, j - 1, inversions);
+    safeInvert(i, j + 1, inversions);
+    safeInvert(i + 1, j, inversions);
+  } else if (type == TileType::Horizontal) {
+    safeInvert(i, j - 1, inversions);
+    safeInvert(i, j + 1, inversions);
+  } else if (type == TileType::Vertical) {
+    safeInvert(i - 1, j, inversions);
+    safeInvert(i + 1, j, inversions);
+  } else if (type == TileType::Blocked) {
+    throw std::runtime_error("Cannot activate a blocked tile.");
+  } else {
+    throw std::invalid_argument("Did not match the tile type.");
   }
 }
 

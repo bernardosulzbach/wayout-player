@@ -46,3 +46,9 @@ BOOST_AUTO_TEST_CASE(largeDefaultBoardShouldBeSolved) {
   const auto boardSolution = Board::fromString(boardString).findSolution();
   BOOST_CHECK(boardSolution.getClicks().size() == 8);
 }
+
+BOOST_AUTO_TEST_CASE(boardWithTwinsShouldBeSolved) {
+  const auto boardString = "D0 D1 D0 D0 D0\nD0 P1 D1 D0 D0\nD0 D0 D0 D1 D0\nD1 D1 D0 D1 P0\nP0 D0 D1 D0 D0";
+  const auto boardSolution = Board::fromString(boardString).findSolution();
+  BOOST_CHECK(boardSolution.getClicks().size() == 6);
+}
