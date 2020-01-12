@@ -13,12 +13,10 @@
 
 namespace WayoutPlayer {
 class Board {
-  constexpr static std::size_t MaximumBoardHashTableSize = 1u << 30u;
-  constexpr static std::size_t MaximumStateQueueSize = 1u << 30u;
-
   std::vector<std::vector<std::optional<Tile>>> matrix;
   bool startedWithBlockedTiles = false;
 
+public:
   [[nodiscard]] S32 getRowCount() const;
 
   [[nodiscard]] S32 getColumnCount() const;
@@ -27,7 +25,6 @@ class Board {
 
   void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked = false);
 
-public:
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
 
   [[nodiscard]] bool hasTile(S32 i, S32 j) const;
@@ -37,8 +34,6 @@ public:
   [[nodiscard]] bool isSolved() const;
 
   void activate(S32 i, S32 j);
-
-  [[nodiscard]] Solution findSolution(bool flipOnlyUp = false) const;
 
   [[nodiscard]] std::size_t hash() const;
 

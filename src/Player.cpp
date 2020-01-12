@@ -1,6 +1,7 @@
 #include "ArgumentParser.hpp"
 #include "Board.hpp"
 #include "Filesystem.hpp"
+#include "Solver.hpp"
 #include "SystemInformation.hpp"
 
 #include <iostream>
@@ -19,7 +20,8 @@ int main(int argc, char **argv) {
     const auto boardString = readFile(argumentParser.getArgument(1));
     const auto board = Board::fromString(boardString);
     std::cout << board.toString() << '\n';
-    const auto solution = board.findSolution();
+    const auto solver = Solver();
+    const auto solution = solver.findSolution(board);
     std::cout << solution.toString() << '\n';
     std::cout << solution.getStatisticsString() << '\n';
   } catch (const std::exception &exception) {

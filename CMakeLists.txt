@@ -11,12 +11,15 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-Wextra)
   add_definitions(-Wshadow)
   add_definitions(-DDEBUGGING)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
-  )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=leak")
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak"
-  )
+      "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG
+      "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=undefined ")
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG
+      "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=leak")
 endif()
 
 add_definitions(-Werror)
@@ -43,6 +46,10 @@ add_library(
   src/Tile.hpp
   src/Text.cpp
   src/Text.hpp
+  src/Solver.cpp
+  src/Solver.hpp
+  src/SolverConfiguration.cpp
+  src/SolverConfiguration.hpp
   src/TileType.cpp
   src/TileType.hpp
   src/Filesystem.cpp
