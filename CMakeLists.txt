@@ -31,6 +31,9 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIR})
 set(Boost_USE_MULTITHREADED ON)
 
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
 add_library(
   wayout-player OBJECT
   src/ArgumentParser.cpp
@@ -54,17 +57,22 @@ add_library(
   src/TileType.hpp
   src/Filesystem.cpp
   src/Filesystem.hpp
+  src/Hashing.cpp
+  src/Hashing.hpp
   src/Solution.cpp
   src/Solution.hpp)
 
 find_package(Threads REQUIRED)
 
 add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
-
+target_link_libraries(test ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries(test ${OPENSSL_SSL_LIBRARY})
 target_link_libraries(test ${Boost_LIBRARIES})
 target_link_libraries(test ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
+target_link_libraries(player ${OPENSSL_CRYPTO_LIBRARY})
+target_link_libraries(player ${OPENSSL_SSL_LIBRARY})
 target_link_libraries(player ${Boost_LIBRARIES})
 target_link_libraries(player ${CMAKE_THREAD_LIBS_INIT})
 

@@ -4,9 +4,18 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../src/Board.hpp"
+#include "../src/Hashing.hpp"
 #include "../src/Solver.hpp"
 
 using namespace WayoutPlayer;
+
+BOOST_AUTO_TEST_CASE(hashingTheEmptyStringTest) {
+  BOOST_CHECK(0xcf83e1357eefb8bdUL == hashString(""));
+}
+
+BOOST_AUTO_TEST_CASE(hashingDigitsTest) {
+  BOOST_CHECK(0xbb96c2fc40d2d546UL == hashString("0123456789"));
+}
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
   const auto boardString = "D0 V1 D0\nD1 D1 D1\nD0 D1 D0\nT1 H1 T1";

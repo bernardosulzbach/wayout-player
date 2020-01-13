@@ -14,4 +14,5 @@ std::string readFile(const std::string &path) {
   buffer << input.rdbuf();
   return buffer.str();
 }
+
 } // namespace WayoutPlayer
