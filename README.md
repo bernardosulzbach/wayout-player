@@ -2,7 +2,13 @@
 
 [![Build Status](https://travis-ci.com/bernardosulzbach/wayout-player.svg?token=BH5q1d6v3PWdPAzWnpKC&branch=master)](https://travis-ci.com/bernardosulzbach/wayout-player)
 
-An automated player for the [Wayout](https://store.steampowered.com/app/551110/Wayout/) game.
+An automated player for the [Wayout](https://store.steampowered.com/app/551110/Wayout/) game written entirely in modern C++.
+
+# Building
+
+A complete script for building and running this project is `build.sh`.
+
+# Running
 
 ```bash
 # Because this process can use a TON of RAM, limiting it is a good idea.
@@ -10,9 +16,6 @@ An automated player for the [Wayout](https://store.steampowered.com/app/551110/W
 # The following line limits the memory usage to 1 GiB on Linux.
 systemd-run --scope -p MemoryMax=1G ./player ../input/Ж.txt
 ```
-# Running
-
-A complete script for building and running this project is `build.sh`.
 
 # License
 
