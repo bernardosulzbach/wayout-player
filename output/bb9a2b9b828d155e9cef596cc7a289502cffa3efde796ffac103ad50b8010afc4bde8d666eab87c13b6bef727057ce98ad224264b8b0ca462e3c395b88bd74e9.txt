@@ -12,4 +12,4 @@ Found an optimal solution:
 Explored nodes: 2,427
 Distinct nodes found: 3,872
 Mean branching factor: 1.59
-Used 7 MiB of memory.
+Used 6,708,000 B (7 MiB) of memory.

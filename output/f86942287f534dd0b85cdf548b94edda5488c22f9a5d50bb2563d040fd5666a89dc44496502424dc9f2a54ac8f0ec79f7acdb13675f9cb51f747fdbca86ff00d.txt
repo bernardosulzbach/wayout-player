@@ -1,0 +1,19 @@
+D1 D1 D0 D1 D0
+D0 D0 D1 D1 D1
+D1 D0 D1 D1 D1
+D0 D1 D1 D0 D1
+D1 D0 D0 D1 D0
+Found an optimal solution:
+  (1, 0)
+  (1, 1)
+  (1, 3)
+  (2, 2)
+  (3, 3)
+  (3, 4)
+  (4, 1)
+  (4, 2)
+  (4, 4)
+Explored nodes: 1,585,524
+Distinct nodes found: 3,169,391
+Mean branching factor: 2.00
+Used 1,788,916,000 B (2 GiB) of memory.

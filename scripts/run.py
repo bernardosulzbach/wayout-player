@@ -1,10 +1,14 @@
 import os
 import subprocess
+import shutil
 
 INPUT_PATH = '../input'
 OUTPUT_PATH = '../output'
 
 if __name__ == '__main__':
+    shutil.rmtree(OUTPUT_PATH, ignore_errors=True)
+    os.mkdir(OUTPUT_PATH)
+    print('Removed all output files.')
     for filename in os.listdir(INPUT_PATH):
         print('Working on {}...'.format(filename))
         with open(os.path.join(OUTPUT_PATH, filename), 'w') as output_file:

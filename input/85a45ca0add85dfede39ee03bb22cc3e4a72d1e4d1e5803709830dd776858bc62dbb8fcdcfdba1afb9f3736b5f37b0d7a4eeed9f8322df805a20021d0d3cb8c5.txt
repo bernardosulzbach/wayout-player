@@ -1,0 +1,6 @@
+V1 D0 H1 D0
+V0 V0    D1
+D0 V1    B1
+H0 V0 H0 H1
+D0    B1 D0
+B1 D1 H0 H0
