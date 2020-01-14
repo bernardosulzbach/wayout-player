@@ -1,5 +1,6 @@
 #include "Solver.hpp"
 
+#include <algorithm>
 #include <queue>
 #include <unordered_set>
 
