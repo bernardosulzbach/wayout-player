@@ -23,7 +23,7 @@ public:
 
   [[nodiscard]] bool mayNeedMultipleClicks() const;
 
-  void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked = false);
+  void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked, std::optional<bool> &twinFinalState);
 
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
 

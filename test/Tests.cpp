@@ -61,8 +61,62 @@ BOOST_AUTO_TEST_CASE(largeDefaultBoardShouldBeSolved) {
 }
 
 BOOST_AUTO_TEST_CASE(boardWithTwinsShouldBeSolved) {
-  const auto boardString = "D0 D1 D0 D0 D0\nD0 P1 D1 D0 D0\nD0 D0 D0 D1 D0\nD1 D1 D0 D1 P0\nP0 D0 D1 D0 D0";
+  const auto boardString = "D0 D1 D0 D0 D0\n"
+                           "D0 P1 D1 D0 D0\n"
+                           "D0 D0 D0 D1 D0\n"
+                           "D1 D1 D0 D1 P0\n"
+                           "P0 D0 D1 D0 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   BOOST_CHECK(boardSolution.getClicks().size() == 6);
+}
+
+BOOST_AUTO_TEST_CASE(activatingDownNeighborTwinsShouldBehaveAsInTheGame) {
+  const auto boardString = "D0 D0         \n"
+                           "P1    D0 D1 D0\n"
+                           "D0    P1 P0 P1\n"
+                           "P1    D0 D1 D0\n"
+                           "D1 D0         ";
+  auto board = Board::fromString(boardString);
+  board.activate(2, 3);
+  const auto expectedFinalBoardString = "D0 D0         \n"
+                                        "P1    D0 D0 D0\n"
+                                        "D0    P1 P1 P1\n"
+                                        "P1    D0 D0 D0\n"
+                                        "D1 D0         ";
+  BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
+}
+
+BOOST_AUTO_TEST_CASE(activatingUpNeighborTwinsShouldBehaveAsInTheGame) {
+  const auto boardString = "D0 D0         \n"
+                           "P1    D0 D1 D0\n"
+                           "D0    P1 P0 P1\n"
+                           "P1    D0 D1 D0\n"
+                           "D1 D0         ";
+  auto board = Board::fromString(boardString);
+  board.activate(3, 0);
+  const auto expectedFinalBoardString = "D0 D0         \n"
+                                        "P0    D0 D1 D0\n"
+                                        "D1    P0 P0 P0\n"
+                                        "P0    D0 D1 D0\n"
+                                        "D0 D0         ";
+  BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
+}
+
+BOOST_AUTO_TEST_CASE(solvingABoardWithNeighboringTwinsShouldBehaveAsInTheGame) {
+  const auto boardString = "D0 D0         \n"
+                           "P1    D0 D1 D0\n"
+                           "D0    P1 P0 P1\n"
+                           "P1    D0 D1 D0\n"
+                           "D1 D0         ";
+  auto board = Board::fromString(boardString);
+  board.activate(3, 0);
+  board.activate(2, 3);
+  board.activate(2, 0);
+  const auto expectedFinalBoardString = "D0 D0         \n"
+                                        "P0    D0 D0 D0\n"
+                                        "D0    P0 P0 P0\n"
+                                        "P0    D0 D0 D0\n"
+                                        "D0 D0         ";
+  BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
 }

@@ -15,7 +15,8 @@ bool Board::mayNeedMultipleClicks() const {
   return startedWithBlockedTiles;
 }
 
-void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked) {
+void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked,
+                       std::optional<bool> &twinFinalState) {
   if (!hasTile(i, j)) {
     return;
   }
@@ -32,9 +33,9 @@ void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool cli
   } else if (matrix[i][j]->type == TileType::Chain) {
     matrix[i][j]->up = !matrix[i][j]->up;
     inversions.push_back({i, j});
-    const auto propagate = [this, &inversions](S32 ni, S32 nj) {
+    const auto propagate = [this, &inversions, &twinFinalState](S32 ni, S32 nj) {
       if (std::find(std::begin(inversions), std::end(inversions), Position{ni, nj}) == std::end(inversions)) {
-        safeInvert(ni, nj, inversions);
+        safeInvert(ni, nj, inversions, false, twinFinalState);
       }
     };
     propagate(i - 1, j);
@@ -42,20 +43,10 @@ void Board::safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool cli
     propagate(i, j + 1);
     propagate(i + 1, j);
   } else if (matrix[i][j]->type == TileType::Twin) {
-    matrix[i][j]->up = !matrix[i][j]->up;
-    // Set all other twins to this state.
-    for (S32 otherI = 0; otherI < getRowCount(); otherI++) {
-      for (S32 otherJ = 0; otherJ < getColumnCount(); otherJ++) {
-        if (otherI == i && otherJ == j) {
-          continue;
-        }
-        if (hasTile(otherI, otherJ)) {
-          if (matrix[otherI][otherJ]->type == TileType::Twin) {
-            matrix[otherI][otherJ]->up = matrix[i][j]->up;
-          }
-        }
-      }
+    if (!twinFinalState) {
+      twinFinalState = !matrix[i][j]->up;
     }
+    matrix[i][j]->up = *twinFinalState;
   } else {
     matrix[i][j]->up = !matrix[i][j]->up;
     inversions.push_back({i, j});
@@ -104,22 +95,38 @@ void Board::activate(S32 i, S32 j) {
   }
   const auto tile = getTile(i, j);
   const auto type = tile.type;
-  safeInvert(i, j, inversions, true);
+  std::optional<bool> twinFinalState;
+  safeInvert(i, j, inversions, true, twinFinalState);
   if (type == TileType::Default || type == TileType::Tap || type == TileType::Chain || type == TileType::Twin) {
-    safeInvert(i - 1, j, inversions);
-    safeInvert(i, j - 1, inversions);
-    safeInvert(i, j + 1, inversions);
-    safeInvert(i + 1, j, inversions);
+    safeInvert(i - 1, j, inversions, false, twinFinalState);
+    safeInvert(i, j - 1, inversions, false, twinFinalState);
+    safeInvert(i, j + 1, inversions, false, twinFinalState);
+    safeInvert(i + 1, j, inversions, false, twinFinalState);
   } else if (type == TileType::Horizontal) {
-    safeInvert(i, j - 1, inversions);
-    safeInvert(i, j + 1, inversions);
+    safeInvert(i, j - 1, inversions, false, twinFinalState);
+    safeInvert(i, j + 1, inversions, false, twinFinalState);
   } else if (type == TileType::Vertical) {
-    safeInvert(i - 1, j, inversions);
-    safeInvert(i + 1, j, inversions);
+    safeInvert(i - 1, j, inversions, false, twinFinalState);
+    safeInvert(i + 1, j, inversions, false, twinFinalState);
   } else if (type == TileType::Blocked) {
     throw std::runtime_error("Cannot activate a blocked tile.");
   } else {
     throw std::invalid_argument("Did not match the tile type.");
+  }
+  if (twinFinalState) {
+    // Set all other twins to this state.
+    for (S32 otherI = 0; otherI < getRowCount(); otherI++) {
+      for (S32 otherJ = 0; otherJ < getColumnCount(); otherJ++) {
+        if (otherI == i && otherJ == j) {
+          continue;
+        }
+        if (hasTile(otherI, otherJ)) {
+          if (matrix[otherI][otherJ]->type == TileType::Twin) {
+            matrix[otherI][otherJ]->up = *twinFinalState;
+          }
+        }
+      }
+    }
   }
 }
 
