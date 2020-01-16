@@ -23,17 +23,18 @@ public:
 
   [[nodiscard]] bool mayNeedMultipleClicks() const;
 
-  void safeInvert(S32 i, S32 j, std::vector<Position> &inversions, bool clicked, std::optional<bool> &twinFinalState);
+  void safeInvert(IndexType i, IndexType j, std::vector<Position> &inversions, bool clicked,
+                  std::optional<bool> &twinFinalState);
 
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
 
-  [[nodiscard]] bool hasTile(S32 i, S32 j) const;
+  [[nodiscard]] bool hasTile(IndexType i, IndexType j) const;
 
-  [[nodiscard]] Tile getTile(S32 i, S32 j) const;
+  [[nodiscard]] Tile getTile(IndexType i, IndexType j) const;
 
   [[nodiscard]] bool isSolved() const;
 
-  void activate(S32 i, S32 j);
+  void activate(IndexType i, IndexType j);
 
   [[nodiscard]] std::size_t hash() const;
 

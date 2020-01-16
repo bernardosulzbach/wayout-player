@@ -7,8 +7,10 @@
 namespace WayoutPlayer {
 class Position {
 public:
-  S32 i = 0;
-  S32 j = 0;
+  IndexType i = 0;
+  IndexType j = 0;
+
+  Position(IndexType i, IndexType j);
 
   bool operator==(const Position &rhs) const;
 

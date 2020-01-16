@@ -120,3 +120,9 @@ BOOST_AUTO_TEST_CASE(solvingABoardWithNeighboringTwinsShouldBehaveAsInTheGame) {
                                         "D0 D0         ";
   BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
 }
+
+BOOST_AUTO_TEST_CASE(positionsShouldBecomeSensibleStrings) {
+  BOOST_CHECK(Position(-1, -1).toString() == "(-1, -1)");
+  BOOST_CHECK(Position(0, 0).toString() == "(0, 0)");
+  BOOST_CHECK(Position(127, 127).toString() == "(127, 127)");
+}

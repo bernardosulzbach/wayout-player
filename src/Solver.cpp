@@ -17,11 +17,11 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
     Board board;
     std::vector<Position> clicked;
 
-    void click(S32 i, S32 j) {
+    void click(IndexType i, IndexType j) {
       return clicked.push_back({i, j});
     }
 
-    [[nodiscard]] bool hasClicked(S32 i, S32 j) const {
+    [[nodiscard]] bool hasClicked(IndexType i, IndexType j) const {
       return std::find(std::begin(clicked), std::end(clicked), Position{i, j}) != std::end(clicked);
     }
 

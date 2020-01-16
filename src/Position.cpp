@@ -4,6 +4,9 @@
 #include <sstream>
 
 namespace WayoutPlayer {
+Position::Position(IndexType i, IndexType j) : i(i), j(j) {
+}
+
 bool Position::operator==(const Position &rhs) const {
   return i == rhs.i && j == rhs.j;
 }
@@ -21,12 +24,12 @@ std::string Position::toString(std::size_t width) const {
   if (width > 0) {
     stream << std::setw(width);
   }
-  stream << i;
+  stream << static_cast<S64>(i);
   stream << ", ";
   if (width > 0) {
     stream << std::setw(width);
   }
-  stream << j;
+  stream << static_cast<S64>(j);
   stream << ")";
   return stream.str();
 }
