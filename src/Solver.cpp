@@ -13,12 +13,19 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
   if (initialBoard.isSolved()) {
     return Solution({}, true);
   }
-  struct State {
-    Board board;
+  class State {
     std::vector<Position> clicked;
 
+  public:
     void click(IndexType i, IndexType j) {
-      return clicked.push_back({i, j});
+      clicked.emplace_back(i, j);
+    }
+
+    void popClick() {
+      if (clicked.empty()) {
+        throw std::runtime_error("Cannot pop click because there are no clicks left.");
+      }
+      clicked.pop_back();
     }
 
     [[nodiscard]] bool hasClicked(IndexType i, IndexType j) const {
@@ -27,6 +34,14 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
 
     [[nodiscard]] std::vector<Position> getClickPositionVector() const {
       return clicked;
+    }
+
+    [[nodiscard]] Board getBoard(const Board &initialBoard) const {
+      auto board = initialBoard;
+      for (const auto &click : clicked) {
+        board.activate(click.i, click.j);
+      }
+      return board;
     }
   };
   const auto n = initialBoard.getRowCount();
@@ -38,28 +53,34 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
   };
   U64 exploredNodes = 0;
   U64 discoveredNodes = 0;
-  State initialState{initialBoard, {}};
+  // This might be get quite large in memory, but using a sequence of clicks will not detect redundancies.
+  // Because in some boards order does not matter, using a  sequence of clicks in those cases could be done.
   std::unordered_set<Board, Hash> seenBoards;
-  seenBoards.insert(initialState.board);
-  for (S32 i = 0; i < n; i++) {
-    for (S32 j = 0; j < m; j++) {
-      if (initialState.board.hasTile(i, j)) {
-        if (initialState.board.getTile(i, j).type == TileType::Tap && initialState.board.getTile(i, j).up) {
-          initialState.board.activate(i, j);
-          initialState.click(i, j);
-          exploredNodes++;
-          seenBoards.insert(initialState.board);
-          discoveredNodes++;
+  seenBoards.insert(initialBoard);
+  auto mayNeedMultipleClicks = false;
+  std::queue<State> stateQueue;
+  // Refactor this into a function, maybe. I don't want initialState defined below to avoid clashes.
+  {
+    State initialState;
+    for (S32 i = 0; i < n; i++) {
+      for (S32 j = 0; j < m; j++) {
+        if (initialBoard.hasTile(i, j)) {
+          const auto &board = initialState.getBoard(initialBoard);
+          if (board.getTile(i, j).type == TileType::Tap && board.getTile(i, j).up) {
+            initialState.click(i, j);
+            exploredNodes++;
+            seenBoards.insert(initialState.getBoard(initialBoard));
+            discoveredNodes++;
+          }
         }
       }
     }
+    if (initialState.getBoard(initialBoard).isSolved()) {
+      return Solution(initialState.getClickPositionVector(), true);
+    }
+    mayNeedMultipleClicks = initialState.getBoard(initialBoard).mayNeedMultipleClicks();
+    stateQueue.push(initialState);
   }
-  if (initialState.board.isSolved()) {
-    return Solution(initialState.getClickPositionVector(), true);
-  }
-  const auto mayNeedMultipleClicks = initialState.board.mayNeedMultipleClicks();
-  std::queue<State> stateQueue;
-  stateQueue.push(initialState);
   std::optional<Solution> solution;
   while (!stateQueue.empty()) {
     if (stateQueue.size() > solverConfiguration.getMaximumStateQueueSize()) {
@@ -72,41 +93,42 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
     }
     const auto state = stateQueue.front();
     stateQueue.pop();
-    auto derivedState = state;
+    State derivedState;
     for (S32 i = 0; i < n; i++) {
       for (S32 j = 0; j < m; j++) {
-        if (!state.board.hasTile(i, j)) {
+        if (!initialBoard.hasTile(i, j)) {
           continue;
         }
         if (!mayNeedMultipleClicks && state.hasClicked(i, j)) {
           continue;
         }
-        if (state.board.getTile(i, j).type == TileType::Tap) {
-          if (state.board.getTile(i, j).up) {
+        const auto stateBoard = state.getBoard(initialBoard);
+        if (stateBoard.getTile(i, j).type == TileType::Tap) {
+          if (stateBoard.getTile(i, j).up) {
             throw std::runtime_error("Should not have up taps during search.");
           }
           continue;
         }
-        if (state.board.getTile(i, j).type == TileType::Blocked) {
+        if (stateBoard.getTile(i, j).type == TileType::Blocked) {
           continue;
         }
         if (flipOnlyUp) {
-          if (state.board.getTile(i, j).up) {
+          if (stateBoard.getTile(i, j).up) {
             continue;
           }
         }
-        derivedState.board = state.board;
-        derivedState.board.activate(i, j);
+        derivedState = state;
         derivedState.click(i, j);
-        if (!solution && derivedState.board.isSolved()) {
+        const auto derivedStateBoard = derivedState.getBoard(initialBoard);
+        if (!solution && derivedStateBoard.isSolved()) {
           solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
         }
-        if (seenBoards.count(derivedState.board) == 0) {
+        if (seenBoards.count(derivedStateBoard) == 0) {
           stateQueue.push(derivedState);
-          seenBoards.insert(derivedState.board);
+          seenBoards.insert(derivedStateBoard);
           discoveredNodes++;
         }
-        derivedState.clicked.pop_back();
+        derivedState.popClick();
       }
     }
     exploredNodes++;
