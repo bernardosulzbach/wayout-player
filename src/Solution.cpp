@@ -26,7 +26,7 @@ bool Solution::operator!=(const Solution &rhs) const {
   return !(rhs == *this);
 }
 
-const std::optional<U64> &Solution::getExploredNodes() const {
+std::optional<U64> Solution::getExploredNodes() const {
   return exploredNodes;
 }
 
@@ -34,7 +34,7 @@ void Solution::setExploredNodes(const U64 newExploredNodes) {
   exploredNodes = newExploredNodes;
 }
 
-const std::optional<U64> &Solution::getDistinctNodes() const {
+std::optional<U64> Solution::getDistinctNodes() const {
   return distinctNodes;
 }
 
@@ -42,12 +42,11 @@ void Solution::setDistinctNodes(const U64 newDistinctNodes) {
   distinctNodes = newDistinctNodes;
 }
 
-const std::optional<F64> &Solution::getMeanBranchingFactor() const {
-  return meanBranchingFactor;
-}
-
-void Solution::setMeanBranchingFactor(const F64 newMeanBranchingFactor) {
-  meanBranchingFactor = newMeanBranchingFactor;
+std::optional<F64> Solution::getMeanBranchingFactor() const {
+  if (exploredNodes && distinctNodes) {
+    return *distinctNodes / static_cast<F64>(*exploredNodes);
+  }
+  return std::nullopt;
 }
 
 std::string Solution::toString() const {
@@ -103,12 +102,6 @@ void Solution::add(const Solution &other) {
     setDistinctNodes(*getDistinctNodes() + *other.getDistinctNodes());
   } else {
     distinctNodes = std::nullopt;
-  }
-
-  if (meanBranchingFactor && other.meanBranchingFactor) {
-    setMeanBranchingFactor(*getMeanBranchingFactor() + *other.getMeanBranchingFactor());
-  } else {
-    meanBranchingFactor = std::nullopt;
   }
 }
 } // namespace WayoutPlayer

@@ -37,7 +37,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
     }
   };
   U64 exploredNodes = 0;
-  U64 discoveredNodes = 0;
   State initialState{initialBoard, {}};
   std::unordered_set<Board, Hash> seenBoards;
   seenBoards.insert(initialState.board);
@@ -49,7 +48,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
           initialState.click(i, j);
           exploredNodes++;
           seenBoards.insert(initialState.board);
-          discoveredNodes++;
         }
       }
     }
@@ -104,7 +102,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
         if (seenBoards.count(derivedState.board) == 0) {
           stateQueue.push(derivedState);
           seenBoards.insert(derivedState.board);
-          discoveredNodes++;
         }
         derivedState.clicked.pop_back();
       }
@@ -113,7 +110,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
     if (solution) {
       solution->setExploredNodes(exploredNodes);
       solution->setDistinctNodes(seenBoards.size());
-      solution->setMeanBranchingFactor(static_cast<F64>(discoveredNodes) / exploredNodes);
       return solution.value();
     }
   }

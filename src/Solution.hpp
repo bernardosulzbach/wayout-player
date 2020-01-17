@@ -12,7 +12,6 @@ class Solution {
 
   std::optional<U64> exploredNodes;
   std::optional<U64> distinctNodes;
-  std::optional<F64> meanBranchingFactor;
 
 public:
   Solution(std::vector<Position> clickVector, bool isOptimal);
@@ -25,14 +24,13 @@ public:
 
   bool operator!=(const Solution &rhs) const;
 
-  [[nodiscard]] const std::optional<U64> &getExploredNodes() const;
+  [[nodiscard]] std::optional<U64> getExploredNodes() const;
   void setExploredNodes(U64 newExploredNodes);
 
-  [[nodiscard]] const std::optional<U64> &getDistinctNodes() const;
+  [[nodiscard]] std::optional<U64> getDistinctNodes() const;
   void setDistinctNodes(U64 newDistinctNodes);
 
-  [[nodiscard]] const std::optional<F64> &getMeanBranchingFactor() const;
-  void setMeanBranchingFactor(F64 newMeanBranchingFactor);
+  [[nodiscard]] std::optional<F64> getMeanBranchingFactor() const;
 
   [[nodiscard]] std::string toString() const;
 
