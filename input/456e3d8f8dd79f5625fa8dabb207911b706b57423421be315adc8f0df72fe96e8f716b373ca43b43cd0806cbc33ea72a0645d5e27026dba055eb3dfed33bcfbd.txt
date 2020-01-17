@@ -1,0 +1,4 @@
+D0 D1 D0    D1 D1
+D1 P0    P1    D0
+D0    D1    D0 P1
+   D0 P0    D1 D0

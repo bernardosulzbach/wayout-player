@@ -1,0 +1,7 @@
+            D0      
+P0 D1    D0 T1 D0   
+D1          D0 T0 D1
+   D0 D0 T1    D1   
+D1 D0 P0 D0         
+   D0 D0 D0    D1   
+      D1    D0 P0   
