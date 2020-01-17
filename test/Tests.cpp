@@ -126,3 +126,27 @@ BOOST_AUTO_TEST_CASE(positionsShouldBecomeSensibleStrings) {
   BOOST_CHECK(Position(0, 0).toString() == "(0, 0)");
   BOOST_CHECK(Position(127, 127).toString() == "(127, 127)");
 }
+
+BOOST_AUTO_TEST_CASE(splittingComponentsShouldWork) {
+  const auto boardString = "D0   \n"
+                           "   D1\n";
+  const auto board = Board::fromString(boardString);
+  const auto components = board.splitComponents();
+  BOOST_CHECK(components.size() == 2);
+  BOOST_CHECK(components[0] != board);
+  BOOST_CHECK(components[1] != board);
+  BOOST_CHECK(Board::mergeComponents(components) == board);
+}
+
+BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
+  const auto boardString = "D0 D0         \n"
+                           "P1    D0 D1 D0\n"
+                           "D0    P1 P0 P1\n"
+                           "P1    D0 D1 D0\n"
+                           "D1 D0         ";
+  const auto board = Board::fromString(boardString);
+  const auto components = board.splitComponents();
+  BOOST_CHECK(components.size() == 1);
+  BOOST_CHECK(components.front() == board);
+  BOOST_CHECK(Board::mergeComponents(components) == board);
+}

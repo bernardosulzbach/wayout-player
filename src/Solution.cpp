@@ -88,4 +88,27 @@ std::string Solution::getStatisticsString() const {
   }
   return string;
 }
+
+void Solution::add(const Solution &other) {
+  clicks.insert(std::end(clicks), std::begin(other.clicks), std::end(other.clicks));
+  optimal = optimal && other.isOptimal();
+
+  if (exploredNodes && other.exploredNodes) {
+    setExploredNodes(*getExploredNodes() + *other.getExploredNodes());
+  } else {
+    exploredNodes = std::nullopt;
+  }
+
+  if (distinctNodes && other.distinctNodes) {
+    setDistinctNodes(*getDistinctNodes() + *other.getDistinctNodes());
+  } else {
+    distinctNodes = std::nullopt;
+  }
+
+  if (meanBranchingFactor && other.meanBranchingFactor) {
+    setMeanBranchingFactor(*getMeanBranchingFactor() + *other.getMeanBranchingFactor());
+  } else {
+    meanBranchingFactor = std::nullopt;
+  }
+}
 } // namespace WayoutPlayer

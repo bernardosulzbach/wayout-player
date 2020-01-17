@@ -37,5 +37,7 @@ public:
   [[nodiscard]] std::string toString() const;
 
   [[nodiscard]] std::string getStatisticsString() const;
+
+  void add(const Solution &other);
 };
 } // namespace WayoutPlayer

@@ -42,6 +42,17 @@ public:
 
   bool operator!=(const Board &rhs) const;
 
+  /**
+   * Splits a board into its connected components.
+   *
+   * Supports all tile types.
+   *
+   * The components are returned in no particular order.
+   */
+  [[nodiscard]] std::vector<Board> splitComponents() const;
+
+  static Board mergeComponents(const std::vector<Board> &components);
+
   [[nodiscard]] std::string toString() const;
 
   static Board fromString(const std::string &string);

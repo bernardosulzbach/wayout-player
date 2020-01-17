@@ -9,7 +9,7 @@ SolverConfiguration &Solver::getSolverConfiguration() {
   return solverConfiguration;
 }
 
-Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const {
+Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool flipOnlyUp) const {
   if (initialBoard.isSolved()) {
     return Solution({}, true);
   }
@@ -18,7 +18,7 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
     std::vector<Position> clicked;
 
     void click(IndexType i, IndexType j) {
-      return clicked.push_back({i, j});
+      clicked.emplace_back(i, j);
     }
 
     [[nodiscard]] bool hasClicked(IndexType i, IndexType j) const {
@@ -118,5 +118,19 @@ Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const 
     }
   }
   throw std::runtime_error("Could not find a solution.");
+}
+
+Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const {
+  const auto components = initialBoard.splitComponents();
+  std::optional<Solution> solution;
+  for (const auto &component : components) {
+    const auto componentSolution = findSolutionWithoutSplitting(component, flipOnlyUp);
+    if (solution) {
+      solution->add(componentSolution);
+    } else {
+      solution = componentSolution;
+    }
+  }
+  return *solution;
 }
 } // namespace WayoutPlayer
