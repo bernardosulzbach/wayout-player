@@ -18,19 +18,27 @@ BOOST_AUTO_TEST_CASE(hashingDigitsTest) {
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
-  const auto boardString = "D0 V1 D0\nD1 D1 D1\nD0 D1 D0\nT1 H1 T1";
+  const auto boardString = "D0 V1 D0\n"
+                           "D1 D1 D1\n"
+                           "D0 D1 D0\n"
+                           "T1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
-  const auto boardString = "D0    D0\nD1 D1 D1\n   D1   \nT1 H1 T1";
+  const auto boardString = "D0    D0\n"
+                           "D1 D1 D1\n"
+                           "   D1   \n"
+                           "T1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
-  const auto boardString = "D0 D1 D0\nD1 D1 D1\nD0 D1 D0";
+  const auto boardString = "D0 D1 D0\n"
+                           "D1 D1 D1\n"
+                           "D0 D1 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   const auto expectedSolution = Solution({Position{1, 1}}, true);
@@ -38,7 +46,9 @@ BOOST_AUTO_TEST_CASE(boardSolutionTest) {
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTestWithTaps) {
-  const auto boardString = "D0 D1 D0\nD1 T1 D1\nD0 D1 D0";
+  const auto boardString = "D0 D1 D0\n"
+                           "D1 T1 D1\n"
+                           "D0 D1 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   const auto expectedSolution = Solution({Position{1, 1}}, true);
@@ -54,7 +64,11 @@ BOOST_AUTO_TEST_CASE(boardsShouldBeDifferentIfTheirTilesAreNotBlocked) {
 }
 
 BOOST_AUTO_TEST_CASE(largeDefaultBoardShouldBeSolved) {
-  const auto boardString = "D1 D0 D1 D0 D1\nD0 D1 D1 D0 D0\nD1 D0 D1 D1 D1\nD1 D0 D0 D0 D1\nD0 D1 D0 D0 D0";
+  const auto boardString = "D1 D0 D1 D0 D1\n"
+                           "D0 D1 D1 D0 D0\n"
+                           "D1 D0 D1 D1 D1\n"
+                           "D1 D0 D0 D0 D1\n"
+                           "D0 D1 D0 D0 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   BOOST_CHECK(boardSolution.getClicks().size() == 8);
