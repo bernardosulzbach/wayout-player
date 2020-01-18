@@ -1,15 +1,9 @@
 #include "TileType.hpp"
 
-#include <array>
-
 namespace WayoutPlayer {
 U32 tileTypeToInteger(TileType tileType) {
   return static_cast<U32>(tileType);
 }
-
-constexpr std::array<TileType, 7> TileTypes = {TileType::Default, TileType::Horizontal, TileType::Vertical,
-                                               TileType::Tap,     TileType::Blocked,    TileType::Chain,
-                                               TileType::Twin};
 
 TileType tileTypeFromInteger(U32 integer) {
   for (const auto tileType : TileTypes) {

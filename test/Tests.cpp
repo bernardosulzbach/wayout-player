@@ -6,6 +6,7 @@
 #include "../src/Board.hpp"
 #include "../src/Hashing.hpp"
 #include "../src/Solver.hpp"
+#include "../src/TileType.hpp"
 
 using namespace WayoutPlayer;
 
@@ -15,6 +16,18 @@ BOOST_AUTO_TEST_CASE(hashingTheEmptyStringTest) {
 
 BOOST_AUTO_TEST_CASE(hashingDigitsTest) {
   BOOST_CHECK(0xbb96c2fc40d2d546UL == hashString("0123456789"));
+}
+
+BOOST_AUTO_TEST_CASE(tileTypeConversionsToCharacters) {
+  for (const auto tileType : TileTypes) {
+    BOOST_CHECK(tileType == tileTypeFromCharacter(tileTypeToCharacter(tileType)));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(tileTypeConversionsToIntegers) {
+  for (const auto tileType : TileTypes) {
+    BOOST_CHECK(tileType == tileTypeFromInteger(tileTypeToInteger(tileType)));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
