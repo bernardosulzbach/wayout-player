@@ -5,11 +5,15 @@
 #include <unordered_set>
 
 namespace WayoutPlayer {
+const SolverConfiguration &Solver::getSolverConfiguration() const {
+  return solverConfiguration;
+}
+
 SolverConfiguration &Solver::getSolverConfiguration() {
   return solverConfiguration;
 }
 
-Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool flipOnlyUp) const {
+Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
   if (initialBoard.isSolved()) {
     return Solution({}, true);
   }
@@ -59,13 +63,17 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
   std::queue<State> stateQueue;
   stateQueue.push(initialState);
   std::optional<Solution> solution;
+  const auto configuration = getSolverConfiguration();
+  const auto maximumStateQueueSize = configuration.getMaximumStateQueueSize();
+  const auto maximumBoardHashTableSize = configuration.getMaximumBoardHashTableSize();
+  const auto flippingOnlyUp = configuration.isFlippingOnlyUp();
   while (!stateQueue.empty()) {
-    if (stateQueue.size() > solverConfiguration.getMaximumStateQueueSize()) {
-      const auto limitString = std::to_string(solverConfiguration.getMaximumStateQueueSize());
+    if (stateQueue.size() > maximumStateQueueSize) {
+      const auto limitString = std::to_string(maximumStateQueueSize);
       throw std::runtime_error("State queue size exceeded the limit of " + limitString + ".");
     }
-    if (seenBoards.size() > solverConfiguration.getMaximumBoardHashTableSize()) {
-      const auto limitString = std::to_string(solverConfiguration.getMaximumBoardHashTableSize());
+    if (seenBoards.size() > maximumBoardHashTableSize) {
+      const auto limitString = std::to_string(maximumBoardHashTableSize);
       throw std::runtime_error("Board hash table size exceeded the limit of " + limitString + ".");
     }
     const auto state = stateQueue.front();
@@ -88,7 +96,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
         if (state.board.getTile(i, j).type == TileType::Blocked) {
           continue;
         }
-        if (flipOnlyUp) {
+        if (flippingOnlyUp) {
           if (state.board.getTile(i, j).up) {
             continue;
           }
@@ -97,7 +105,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
         derivedState.board.activate(i, j);
         derivedState.click(i, j);
         if (!solution && derivedState.board.isSolved()) {
-          solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
+          solution = Solution(derivedState.getClickPositionVector(), !flippingOnlyUp);
         }
         if (seenBoards.count(derivedState.board) == 0) {
           stateQueue.push(derivedState);
@@ -116,11 +124,11 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard, bool fl
   throw std::runtime_error("Could not find a solution.");
 }
 
-Solution Solver::findSolution(const Board &initialBoard, bool flipOnlyUp) const {
+Solution Solver::findSolution(const Board &initialBoard) const {
   const auto components = initialBoard.splitComponents();
   std::optional<Solution> solution;
   for (const auto &component : components) {
-    const auto componentSolution = findSolutionWithoutSplitting(component, flipOnlyUp);
+    const auto componentSolution = findSolutionWithoutSplitting(component);
     if (solution) {
       solution->add(componentSolution);
     } else {

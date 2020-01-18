@@ -7,12 +7,13 @@ namespace WayoutPlayer {
 class Solver {
   SolverConfiguration solverConfiguration;
 
-  [[nodiscard]] Solution findSolutionWithoutSplitting(const Board &initialState, bool flipOnlyUp = false) const;
+  [[nodiscard]] Solution findSolutionWithoutSplitting(const Board &initialState) const;
 
 public:
-  SolverConfiguration &getSolverConfiguration();
+  [[nodiscard]] const SolverConfiguration &getSolverConfiguration() const;
 
-  // TODO: Move flipOnlyUp into the solver configuration object.
-  [[nodiscard]] Solution findSolution(const Board &initialState, bool flipOnlyUp = false) const;
+  [[nodiscard]] SolverConfiguration &getSolverConfiguration();
+
+  [[nodiscard]] Solution findSolution(const Board &initialState) const;
 };
 } // namespace WayoutPlayer

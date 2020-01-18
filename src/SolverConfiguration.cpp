@@ -17,6 +17,14 @@ void SolverConfiguration::setMaximumStateQueueSize(std::size_t newMaximumStateQu
   maximumStateQueueSize = newMaximumStateQueueSize;
 }
 
+bool SolverConfiguration::isFlippingOnlyUp() const {
+  return flipOnlyUp;
+}
+
+void SolverConfiguration::setFlipOnlyUp(bool newFlipOnlyUp) {
+  flipOnlyUp = newFlipOnlyUp;
+}
+
 bool SolverConfiguration::isVerbose() const {
   return verbose;
 }
