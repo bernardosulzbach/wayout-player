@@ -26,13 +26,13 @@ if __name__ == '__main__':
             to_be_removed.append(filename)
         else:
             mapping.update({digest: filename})
+    for removal in to_be_removed:
+        target = os.path.join(INPUT_PATH, removal)
+        os.remove(target)
+        print('Removed {}.'.format(target))
     for entry in mapping:
         if mapping[entry] != entry + '.txt':
             source = os.path.join(INPUT_PATH, mapping[entry])
             destination = os.path.join(INPUT_PATH, entry + '.txt')
             shutil.move(source, destination)
             print('Moved {} to {}.'.format(source, destination))
-    for removal in to_be_removed:
-        target = os.path.join(INPUT_PATH, removal)
-        os.remove(target)
-        print('Removed {}.'.format(target))
