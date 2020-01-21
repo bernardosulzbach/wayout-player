@@ -20,7 +20,8 @@ int main(int argc, char **argv) {
     const auto boardString = readFile(argumentParser.getArgument(1));
     const auto board = Board::fromString(boardString);
     std::cout << board.toString() << '\n';
-    const auto solver = Solver();
+    auto solver = Solver();
+    solver.getSolverConfiguration().setVerbose(true);
     const auto solution = solver.findSolution(board);
     std::cout << solution.toString() << '\n';
     std::cout << solution.getStatisticsString() << '\n';

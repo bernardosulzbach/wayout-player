@@ -52,10 +52,13 @@ std::optional<F64> Solution::getMeanBranchingFactor() const {
 std::string Solution::toString() const {
   std::string string;
   if (isOptimal()) {
-    string += "Found an optimal solution:";
+    string += "Found an optimal solution";
   } else {
-    string += "Found a solution:";
+    string += "Found a solution";
   }
+  string += " with ";
+  string += toPluralizedString(clicks.size(), "click");
+  string += ":";
   string += '\n';
   for (const auto click : clicks) {
     string += "  ";

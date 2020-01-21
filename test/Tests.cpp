@@ -40,6 +40,21 @@ BOOST_AUTO_TEST_CASE(boardIsSolvedWorksOnUnsolvedBoards) {
   BOOST_CHECK(!Board::fromString("B1").isSolved());
 }
 
+BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithDefaultTiles) {
+  const auto connectedBoardString = "D0 D0\n"
+                                    "   D0";
+  BOOST_CHECK(Board::fromString(connectedBoardString).splitComponents().size() == 1);
+  const auto disconnectedBoardString = "D0   \n"
+                                       "   D0";
+  BOOST_CHECK(Board::fromString(disconnectedBoardString).splitComponents().size() == 2);
+}
+
+BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithTwins) {
+  const auto boardString = "P0   \n"
+                           "   P0";
+  BOOST_CHECK(Board::fromString(boardString).splitComponents().size() == 1);
+}
+
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
   const auto boardString = "D0 V1 D0\n"
                            "D1 D1 D1\n"

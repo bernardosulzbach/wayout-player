@@ -1,8 +1,11 @@
 #include "Solver.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <queue>
 #include <unordered_set>
+
+#include "Text.hpp"
 
 namespace WayoutPlayer {
 const SolverConfiguration &Solver::getSolverConfiguration() const {
@@ -126,6 +129,9 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
 
 Solution Solver::findSolution(const Board &initialBoard) const {
   const auto components = initialBoard.splitComponents();
+  if (getSolverConfiguration().isVerbose()) {
+    std::cout << "Found " << toPluralizedString(components.size(), "component") << "." << '\n';
+  }
   std::optional<Solution> solution;
   for (const auto &component : components) {
     const auto componentSolution = findSolutionWithoutSplitting(component);
