@@ -30,6 +30,16 @@ BOOST_AUTO_TEST_CASE(tileTypeConversionsToIntegers) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(boardIsSolvedWorksOnSolvedBoards) {
+  BOOST_CHECK(Board::fromString("D0").isSolved());
+}
+
+BOOST_AUTO_TEST_CASE(boardIsSolvedWorksOnUnsolvedBoards) {
+  BOOST_CHECK(!Board::fromString("D1").isSolved());
+  BOOST_CHECK(!Board::fromString("B0").isSolved());
+  BOOST_CHECK(!Board::fromString("B1").isSolved());
+}
+
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
   const auto boardString = "D0 V1 D0\n"
                            "D1 D1 D1\n"

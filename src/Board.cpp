@@ -79,7 +79,7 @@ bool Board::isSolved() const {
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
       if (hasTile(i, j)) {
-        if (matrix[i][j]->up) {
+        if (matrix[i][j]->up || matrix[i][j]->type == TileType::Blocked) {
           return false;
         }
       }
