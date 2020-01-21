@@ -33,6 +33,10 @@ void Board::safeInvert(IndexType i, IndexType j, std::vector<Position> &inversio
   } else if (matrix[i][j]->type == TileType::Chain) {
     matrix[i][j]->up = !matrix[i][j]->up;
     inversions.emplace_back(i, j);
+    // This will work as a default tile unless it was not clicked.
+    if (clicked) {
+      return;
+    }
     const auto propagate = [this, &inversions, &twinFinalState](IndexType ni, IndexType nj) {
       if (std::find(std::begin(inversions), std::end(inversions), Position{ni, nj}) == std::end(inversions)) {
         safeInvert(ni, nj, inversions, false, twinFinalState);

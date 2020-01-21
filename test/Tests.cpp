@@ -73,6 +73,13 @@ BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
   BOOST_CHECK(board.toString() == boardString);
 }
 
+BOOST_AUTO_TEST_CASE(activatingAChainTest) {
+  const auto boardString = "C1 D0";
+  auto board = Board::fromString(boardString);
+  board.activate(0, 0);
+  BOOST_CHECK(board.toString() == "C0 D1");
+}
+
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
   const auto boardString = "D0 D1 D0\n"
                            "D1 D1 D1\n"
