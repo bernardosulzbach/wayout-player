@@ -63,6 +63,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     return Solution(initialState.getClickPositionVector(), true);
   }
   const auto mayNeedMultipleClicks = initialState.board.mayNeedMultipleClicks();
+  const auto canBeSolvedOptimallyDirectionally = initialState.board.canBeSolvedOptimallyDirectionally();
   std::queue<State> stateQueue;
   stateQueue.push(initialState);
   std::optional<Solution> solution;
@@ -83,6 +84,12 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     stateQueue.pop();
     auto derivedState = state;
     for (S32 i = 0; i < n; i++) {
+      if (canBeSolvedOptimallyDirectionally) {
+        // TODO: could also skip trying to click in the first rows.
+        if (state.board.hasUnsolvedTilesAtRow(i - 2)) {
+          break;
+        }
+      }
       for (S32 j = 0; j < m; j++) {
         if (!state.board.hasTile(i, j)) {
           continue;

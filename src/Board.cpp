@@ -15,6 +15,20 @@ bool Board::mayNeedMultipleClicks() const {
   return startedWithBlockedTiles;
 }
 
+bool Board::canBeSolvedOptimallyDirectionally() const {
+  for (S32 i = 0; i < getRowCount(); i++) {
+    for (S32 j = 0; j < getColumnCount(); j++) {
+      if (hasTile(i, j)) {
+        const auto type = getTile(i, j).type;
+        if (type == TileType::Blocked || type == TileType::Chain || type == TileType::Twin) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 void Board::safeInvert(IndexType i, IndexType j, std::vector<Position> &inversions, bool clicked,
                        std::optional<bool> &twinFinalState) {
   if (!hasTile(i, j)) {
@@ -71,11 +85,25 @@ Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(
   }
 }
 
-[[nodiscard]] bool Board::hasTile(IndexType i, IndexType j) const {
+bool Board::hasUnsolvedTilesAtRow(IndexType i) const {
+  if (i < 0 || i >= getRowCount()) {
+    return false;
+  }
+  for (S32 j = 0; j < getColumnCount(); j++) {
+    if (hasTile(i, j)) {
+      if (matrix[i][j]->up || matrix[i][j]->type == TileType::Blocked) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool Board::hasTile(IndexType i, IndexType j) const {
   return i >= 0 && i < getRowCount() && j >= 0 && j < getColumnCount() && matrix[i][j].has_value();
 }
 
-[[nodiscard]] Tile Board::getTile(IndexType i, IndexType j) const {
+Tile Board::getTile(IndexType i, IndexType j) const {
   return matrix[i][j].value();
 }
 
