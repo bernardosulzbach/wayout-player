@@ -26,7 +26,9 @@ SystemInformation::SystemInformation() {
   //
   //   ru_maxrss (since Linux 2.6.32)
   //   This is the maximum resident set size used (in kilobytes).
-  maximumResidentSetSize = 1000 * readMaximumResidentSetSize;
+  //
+  // Bernardo Sulzbach: they actually meant kibibytes.
+  maximumResidentSetSize = 1024 * readMaximumResidentSetSize;
 #endif
 }
 
