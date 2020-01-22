@@ -239,9 +239,9 @@ std::vector<Board> Board::splitComponents() const {
     }
   }
   const auto componentCount = currentTag;
-  Board emptyBoard(
-      std::vector<std::vector<std::optional<Tile>>>(rowCount, std::vector<std::optional<Tile>>(columnCount)));
-  std::vector<Board> components(componentCount, emptyBoard);
+  const auto emptyRow = std::vector<std::optional<Tile>>(columnCount);
+  const auto emptyBoard = Board(std::vector<std::vector<std::optional<Tile>>>(rowCount, emptyRow));
+  auto components = std::vector<Board>(componentCount, emptyBoard);
   for (S32 i = 0; i < rowCount; i++) {
     for (S32 j = 0; j < columnCount; j++) {
       if (tagMatrix[i][j] != NoTag) {
