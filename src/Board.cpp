@@ -30,6 +30,67 @@ bool Board::canBeSolvedOptimallyDirectionally() const {
   return true;
 }
 
+bool Board::mayLowerOrUnblocksTilesIfClicked(S32 i, S32 j) const {
+  const auto iString = std::to_string(i);
+  const auto jString = std::to_string(j);
+  if (!hasTile(i, j)) {
+    throw std::invalid_argument("No tile at (" + iString + ", " + jString + ").");
+  }
+  const auto type = getTile(i, j).type;
+  if (getTile(i, j).up) {
+    return true;
+  }
+  const auto isRaisedOrBlockedAndAffected = [this](S32 neighborI, S32 neighborJ) {
+    if (!hasTile(neighborI, neighborJ)) {
+      return false;
+    }
+    const auto neighbor = getTile(neighborI, neighborJ);
+    if (neighbor.type == TileType::Tap) {
+      return false;
+    }
+    return neighbor.up || neighbor.type == TileType::Blocked;
+  };
+  if (type == TileType::Default) {
+    if (isRaisedOrBlockedAndAffected(i - 1, j)) {
+      return true;
+    }
+    if (isRaisedOrBlockedAndAffected(i, j - 1)) {
+      return true;
+    }
+    if (isRaisedOrBlockedAndAffected(i, j + 1)) {
+      return true;
+    }
+    if (isRaisedOrBlockedAndAffected(i + 1, j)) {
+      return true;
+    }
+  } else if (type == TileType::Horizontal) {
+    if (isRaisedOrBlockedAndAffected(i, j - 1)) {
+      return true;
+    }
+    if (isRaisedOrBlockedAndAffected(i, j + 1)) {
+      return true;
+    }
+  } else if (type == TileType::Vertical) {
+    if (isRaisedOrBlockedAndAffected(i - 1, j)) {
+      return true;
+    }
+    if (isRaisedOrBlockedAndAffected(i + 1, j)) {
+      return true;
+    }
+  } else if (type == TileType::Tap) {
+    throw std::invalid_argument("Should not be considering taps during the solution search.");
+  } else if (type == TileType::Blocked) {
+    throw std::invalid_argument("Blocked tile at (" + iString + ", " + jString + ") cannot be clicked.");
+  } else if (type == TileType::Chain) {
+    // TODO: implement a proper check here.
+    return true;
+  } else if (type == TileType::Twin) {
+    // TODO: implement a proper check here.
+    return true;
+  }
+  return false;
+}
+
 void Board::safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory &history) {
   if (!hasTile(i, j)) {
     return;

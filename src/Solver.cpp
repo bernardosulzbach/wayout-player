@@ -84,17 +84,8 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     stateQueue.pop();
     auto derivedState = state;
     for (S32 i = 0; i < n; i++) {
-      if (canBeSolvedOptimallyDirectionally) {
-        // TODO: could also skip trying to click in the first rows.
-        if (state.board.hasUnsolvedTilesAtRow(i - 2)) {
-          break;
-        }
-      }
       for (S32 j = 0; j < m; j++) {
         if (!state.board.hasTile(i, j)) {
-          continue;
-        }
-        if (!mayNeedMultipleClicks && state.hasClicked(i, j)) {
           continue;
         }
         if (state.board.getTile(i, j).type == TileType::Tap) {
@@ -106,10 +97,11 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
         if (state.board.getTile(i, j).type == TileType::Blocked) {
           continue;
         }
-        if (flippingOnlyUp) {
-          if (state.board.getTile(i, j).up) {
-            continue;
-          }
+        if (!mayNeedMultipleClicks && state.hasClicked(i, j)) {
+          continue;
+        }
+        if (!state.board.mayLowerOrUnblocksTilesIfClicked(i, j)) {
+          continue;
         }
         derivedState.board = state.board;
         derivedState.board.activate(i, j);

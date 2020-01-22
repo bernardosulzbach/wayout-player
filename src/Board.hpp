@@ -39,6 +39,13 @@ public:
    */
   [[nodiscard]] bool canBeSolvedOptimallyDirectionally() const;
 
+  /**
+   * Returns whether clicking at (i, j) may lower or unblock at least one tile.
+   *
+   * This function may return true even if clicking (i, j) does not actually lower or unblocks any tiles.
+   */
+  [[nodiscard]] bool mayLowerOrUnblocksTilesIfClicked(S32 i, S32 j) const;
+
   void safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory &history);
 
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
