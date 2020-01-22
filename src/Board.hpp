@@ -12,6 +12,12 @@
 #include "Types.hpp"
 
 namespace WayoutPlayer {
+class InversionHistory {
+public:
+  std::vector<Position> inversions;
+  std::optional<bool> twinFinalState;
+};
+
 class Board {
   std::vector<std::vector<std::optional<Tile>>> matrix;
   bool startedWithBlockedTiles = false;
@@ -33,8 +39,7 @@ public:
    */
   [[nodiscard]] bool canBeSolvedOptimallyDirectionally() const;
 
-  void safeInvert(IndexType i, IndexType j, std::vector<Position> &inversions, bool clicked,
-                  std::optional<bool> &twinFinalState);
+  void safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory &history);
 
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
 
