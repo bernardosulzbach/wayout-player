@@ -107,7 +107,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
           continue;
         }
         if (flippingOnlyUp) {
-          if (state.board.getTile(i, j).up) {
+          if (!state.board.getTile(i, j).up) {
             continue;
           }
         }
