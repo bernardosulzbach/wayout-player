@@ -226,7 +226,7 @@ std::vector<Board> Board::splitComponents() const {
       propagateTag(i, j + 1);
       propagateTag(i + 1, j);
     } else if (tagMatrix[i][j] != currentTag) {
-      throw std::runtime_error("Should not happen: a tag found an already existing tag.");
+      throw std::runtime_error("Should not happen: found a tile tagged with another tag while propagating a tag.");
     }
   };
   for (S32 i = 0; i < rowCount; i++) {
@@ -241,14 +241,19 @@ std::vector<Board> Board::splitComponents() const {
   }
   const auto componentCount = currentTag;
   const auto emptyRow = std::vector<std::optional<Tile>>(columnCount);
-  const auto emptyBoard = Board(std::vector<std::vector<std::optional<Tile>>>(rowCount, emptyRow));
-  auto components = std::vector<Board>(componentCount, emptyBoard);
+  using TileMatrix = std::vector<std::vector<std::optional<Tile>>>;
+  const auto emptyTileMatrix = TileMatrix(rowCount, emptyRow);
+  auto tileMatrices = std::vector<TileMatrix>(componentCount, emptyTileMatrix);
   for (S32 i = 0; i < rowCount; i++) {
     for (S32 j = 0; j < columnCount; j++) {
       if (tagMatrix[i][j] != NoTag) {
-        components[tagMatrix[i][j]].matrix[i][j] = getTile(i, j);
+        tileMatrices[tagMatrix[i][j]][i][j] = getTile(i, j);
       }
     }
+  }
+  auto components = std::vector<Board>{};
+  for (const auto &tileMatrix : tileMatrices) {
+    components.emplace_back(tileMatrix);
   }
   return components;
 }

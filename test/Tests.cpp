@@ -186,9 +186,59 @@ BOOST_AUTO_TEST_CASE(positionsShouldBecomeSensibleStrings) {
   BOOST_CHECK(Position(127, 127).toString() == "(127, 127)");
 }
 
+BOOST_AUTO_TEST_CASE(splittingComponentsShouldJudgeTheNeedForMultipleClicks) {
+  const auto boardString = "D0    B1 D0\n"
+                           "D1    D0 B1";
+  const auto board = Board::fromString(boardString);
+  BOOST_CHECK(board.splitComponents().size() == 2);
+  auto requiringMultipleClicks = 0;
+  auto notRequiringMultipleClicks = 0;
+  for (const auto &component : board.splitComponents()) {
+    if (component.mayNeedMultipleClicks()) {
+      requiringMultipleClicks++;
+    } else {
+      notRequiringMultipleClicks++;
+    }
+  }
+  BOOST_CHECK(requiringMultipleClicks == 1);
+  BOOST_CHECK(notRequiringMultipleClicks == 1);
+}
+
+BOOST_AUTO_TEST_CASE(shouldUnderstandThatABlockedTilesMayNeedMultipleClicks) {
+  const auto boardString = "B1 D0\n"
+                           "D0 B1";
+  const auto board = Board::fromString(boardString);
+  BOOST_CHECK(board.mayNeedMultipleClicks());
+}
+
+BOOST_AUTO_TEST_CASE(boardWithBlockedTilesShouldBehaveAsInTheGame) {
+  const auto boardString = "B1 D0\n"
+                           "D0 B1";
+  auto board = Board::fromString(boardString);
+  board.activate(0, 1);
+  BOOST_CHECK(board.toString() == "D1 D1\nD0 D1");
+  board.activate(0, 1);
+  BOOST_CHECK(board.toString() == "D0 D0\nD0 D0");
+}
+
+BOOST_AUTO_TEST_CASE(shouldSolveSmallBoardWithBlockedTiles) {
+  const auto boardString = "B1 D0\n"
+                           "D0 B1";
+  const auto board = Board::fromString(boardString);
+  BOOST_CHECK(Solver().findSolution(board).getClicks().size() == 2);
+}
+
+BOOST_AUTO_TEST_CASE(shouldFindComponentsInASmallBoardWithBlockedTiles) {
+  const auto boardString = "B1 D0\n"
+                           "D0 B1";
+  const auto board = Board::fromString(boardString);
+  const auto components = board.splitComponents();
+  BOOST_CHECK(components.size() == 1);
+}
+
 BOOST_AUTO_TEST_CASE(splittingComponentsShouldWork) {
   const auto boardString = "D0   \n"
-                           "   D1\n";
+                           "   D1";
   const auto board = Board::fromString(boardString);
   const auto components = board.splitComponents();
   BOOST_CHECK(components.size() == 2);

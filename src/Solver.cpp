@@ -154,7 +154,8 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
       return solution.value();
     }
   }
-  throw std::runtime_error("Could not find a solution.");
+  const auto exploredNodeCount = toPluralizedString(exploredNodes, "node");
+  throw std::runtime_error("Could not find a solution after exploring " + exploredNodeCount + ".");
 }
 
 Solution Solver::findSolution(const Board &initialBoard) const {
