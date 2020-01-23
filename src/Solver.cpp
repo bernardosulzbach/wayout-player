@@ -71,6 +71,11 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
   const auto maximumStateQueueSize = configuration.getMaximumStateQueueSize();
   const auto maximumBoardHashTableSize = configuration.getMaximumBoardHashTableSize();
   const auto flippingOnlyUp = configuration.isFlippingOnlyUp();
+  if (configuration.isVerbose()) {
+    if (canBeSolvedOptimallyDirectionally) {
+      std::cout << "Can be solved from any direction." << '\n';
+    }
+  }
   while (!stateQueue.empty()) {
     if (stateQueue.size() > maximumStateQueueSize) {
       const auto limitString = std::to_string(maximumStateQueueSize);
