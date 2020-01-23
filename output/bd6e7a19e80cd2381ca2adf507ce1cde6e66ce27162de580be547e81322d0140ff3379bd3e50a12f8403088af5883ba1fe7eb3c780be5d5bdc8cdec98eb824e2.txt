@@ -3,7 +3,8 @@ D0 P1 D1 D0 D0
 D0 D0 D0 D1 D0
 D1 D1 D0 D1 P0
 P0 D0 D1 D0 D0
-Found an optimal solution:
+Found 1 component.
+Found an optimal solution with 6 clicks:
   (2, 0)
   (3, 0)
   (1, 1)
@@ -13,4 +14,4 @@ Found an optimal solution:
 Explored nodes: 94,989
 Distinct nodes found: 379,248
 Mean branching factor: 3.99
-Used 254,196,000 B (243 MiB) of memory.
+Used 250,281,984 B (239 MiB) of memory.
