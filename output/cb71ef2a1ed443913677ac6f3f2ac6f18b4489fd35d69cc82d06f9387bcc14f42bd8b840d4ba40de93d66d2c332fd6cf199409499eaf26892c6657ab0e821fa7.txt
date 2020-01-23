@@ -2,7 +2,9 @@ D0 T1 D0 D0 D0 D1
    D1    T1 D1 T1
 D0 T0 D0    D0   
 D0 D0 D0 D1 T1 D1
-Found an optimal solution:
+Found 1 component.
+Can be solved from any direction.
+Found an optimal solution with 7 clicks:
   (0, 1)
   (1, 3)
   (1, 5)
@@ -10,7 +12,7 @@ Found an optimal solution:
   (0, 0)
   (0, 2)
   (2, 4)
-Explored nodes: 21
-Distinct nodes found: 135
-Mean branching factor: 6.38
-Used 6,396,000 B (7 MiB) of memory.
+Explored nodes: 8
+Distinct nodes found: 19
+Mean branching factor: 2.38
+Used 6,864,896 B (7 MiB) of memory.
