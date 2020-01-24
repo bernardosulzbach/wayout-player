@@ -1,9 +1,10 @@
 B1 D0
 D0 B1
-Found an optimal solution:
+Found 1 component.
+Found an optimal solution with 2 clicks:
   (0, 1)
   (0, 1)
 Explored nodes: 2
 Distinct nodes found: 7
-Mean branching factor: 3.00
-Used 6,396,000 B (7 MiB) of memory.
+Mean branching factor: 3.50
+Used 6,840,320 B (7 MiB) of memory.

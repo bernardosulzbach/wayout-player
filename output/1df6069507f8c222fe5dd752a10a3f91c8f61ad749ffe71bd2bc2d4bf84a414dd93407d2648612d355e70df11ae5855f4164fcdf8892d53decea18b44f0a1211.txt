@@ -3,22 +3,24 @@ D1 D0 D1 D1 D1
 D0 D0 D1 D1 D1
 D0 D0 D1 D0 D0
 D0 D0 D1 D1 D0
-Found an optimal solution:
+Found 1 component.
+Can be solved from any direction.
+Found an optimal solution with 14 clicks:
   (0, 0)
-  (0, 1)
-  (1, 0)
+  (0, 3)
+  (0, 2)
   (1, 1)
-  (1, 2)
+  (1, 4)
+  (2, 0)
   (1, 3)
-  (2, 3)
-  (3, 0)
+  (2, 1)
   (3, 1)
-  (3, 2)
+  (4, 2)
   (3, 3)
-  (4, 1)
-  (4, 3)
+  (2, 4)
   (4, 4)
-Explored nodes: 8,065,004
-Distinct nodes found: 8,345,461
-Mean branching factor: 1.03
-Used 3,358,344,000 B (4 GiB) of memory.
+  (3, 4)
+Explored nodes: 215,268
+Distinct nodes found: 447,962
+Mean branching factor: 2.08
+Used 258,510,848 B (247 MiB) of memory.

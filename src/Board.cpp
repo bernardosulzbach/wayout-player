@@ -3,6 +3,7 @@
 #include <boost/functional/hash.hpp>
 
 namespace WayoutPlayer {
+
 S32 Board::getRowCount() const {
   return static_cast<S32>(matrix.size());
 }
@@ -15,7 +16,7 @@ bool Board::mayNeedMultipleClicks() const {
   return startedWithBlockedTiles;
 }
 
-bool Board::canBeSolvedOptimallyDirectionally() const {
+bool Board::canBeSolvedInAnyOrder() const {
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
       if (hasTile(i, j)) {
@@ -29,15 +30,14 @@ bool Board::canBeSolvedOptimallyDirectionally() const {
   return true;
 }
 
-void Board::safeInvert(IndexType i, IndexType j, std::vector<Position> &inversions, bool clicked,
-                       std::optional<bool> &twinFinalState) {
+void Board::safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory &history) {
   if (!hasTile(i, j)) {
     return;
   }
   if (matrix[i][j]->type == TileType::Tap) {
     if (clicked) {
       matrix[i][j]->up = !matrix[i][j]->up;
-      inversions.emplace_back(i, j);
+      history.inversions.emplace_back(i, j);
     }
   } else if (matrix[i][j]->type == TileType::Blocked) {
     if (clicked) {
@@ -46,14 +46,16 @@ void Board::safeInvert(IndexType i, IndexType j, std::vector<Position> &inversio
     matrix[i][j]->type = TileType::Default;
   } else if (matrix[i][j]->type == TileType::Chain) {
     matrix[i][j]->up = !matrix[i][j]->up;
-    inversions.emplace_back(i, j);
+    history.inversions.emplace_back(i, j);
     // This will work as a default tile unless it was not clicked.
     if (clicked) {
       return;
     }
-    const auto propagate = [this, &inversions, &twinFinalState](IndexType ni, IndexType nj) {
-      if (std::find(std::begin(inversions), std::end(inversions), Position{ni, nj}) == std::end(inversions)) {
-        safeInvert(ni, nj, inversions, false, twinFinalState);
+    const auto propagate = [this, &history](IndexType ni, IndexType nj) {
+      const auto begin = std::begin(history.inversions);
+      const auto end = std::end(history.inversions);
+      if (std::find(begin, end, Position{ni, nj}) == end) {
+        safeInvert(ni, nj, false, history);
       }
     };
     propagate(i - 1, j);
@@ -61,13 +63,13 @@ void Board::safeInvert(IndexType i, IndexType j, std::vector<Position> &inversio
     propagate(i, j + 1);
     propagate(i + 1, j);
   } else if (matrix[i][j]->type == TileType::Twin) {
-    if (!twinFinalState) {
-      twinFinalState = !matrix[i][j]->up;
+    if (!history.twinFinalState) {
+      history.twinFinalState = !matrix[i][j]->up;
     }
-    matrix[i][j]->up = *twinFinalState;
+    matrix[i][j]->up = *history.twinFinalState;
   } else {
     matrix[i][j]->up = !matrix[i][j]->up;
-    inversions.emplace_back(i, j);
+    history.inversions.emplace_back(i, j);
   }
 }
 
@@ -83,20 +85,6 @@ Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(
       }
     }
   }
-}
-
-bool Board::hasUnsolvedTilesAtRow(IndexType i) const {
-  if (i < 0 || i >= getRowCount()) {
-    return false;
-  }
-  for (S32 j = 0; j < getColumnCount(); j++) {
-    if (hasTile(i, j)) {
-      if (matrix[i][j]->up || matrix[i][j]->type == TileType::Blocked) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 bool Board::hasTile(IndexType i, IndexType j) const {
@@ -121,31 +109,30 @@ bool Board::isSolved() const {
 }
 
 void Board::activate(IndexType i, IndexType j) {
-  std::vector<Position> inversions;
   if (!hasTile(i, j)) {
     return;
   }
   const auto tile = getTile(i, j);
   const auto type = tile.type;
-  std::optional<bool> twinFinalState;
-  safeInvert(i, j, inversions, true, twinFinalState);
+  InversionHistory history;
+  safeInvert(i, j, true, history);
   if (type == TileType::Default || type == TileType::Tap || type == TileType::Chain || type == TileType::Twin) {
-    safeInvert(i - 1, j, inversions, false, twinFinalState);
-    safeInvert(i, j - 1, inversions, false, twinFinalState);
-    safeInvert(i, j + 1, inversions, false, twinFinalState);
-    safeInvert(i + 1, j, inversions, false, twinFinalState);
+    safeInvert(i - 1, j, false, history);
+    safeInvert(i, j - 1, false, history);
+    safeInvert(i, j + 1, false, history);
+    safeInvert(i + 1, j, false, history);
   } else if (type == TileType::Horizontal) {
-    safeInvert(i, j - 1, inversions, false, twinFinalState);
-    safeInvert(i, j + 1, inversions, false, twinFinalState);
+    safeInvert(i, j - 1, false, history);
+    safeInvert(i, j + 1, false, history);
   } else if (type == TileType::Vertical) {
-    safeInvert(i - 1, j, inversions, false, twinFinalState);
-    safeInvert(i + 1, j, inversions, false, twinFinalState);
+    safeInvert(i - 1, j, false, history);
+    safeInvert(i + 1, j, false, history);
   } else if (type == TileType::Blocked) {
     throw std::runtime_error("Cannot activate a blocked tile.");
   } else {
     throw std::invalid_argument("Did not match the tile type.");
   }
-  if (twinFinalState) {
+  if (history.twinFinalState) {
     // Set all other twins to this state.
     for (S32 otherI = 0; otherI < getRowCount(); otherI++) {
       for (S32 otherJ = 0; otherJ < getColumnCount(); otherJ++) {
@@ -154,7 +141,7 @@ void Board::activate(IndexType i, IndexType j) {
         }
         if (hasTile(otherI, otherJ)) {
           if (matrix[otherI][otherJ]->type == TileType::Twin) {
-            matrix[otherI][otherJ]->up = *twinFinalState;
+            matrix[otherI][otherJ]->up = *history.twinFinalState;
           }
         }
       }
@@ -192,8 +179,8 @@ std::vector<Board> Board::splitComponents() const {
   TaggedTileMatrix tagMatrix(rowCount, std::vector<TagType>(columnCount, NoTag));
   TagType currentTag = 0;
   auto foundTwin = false;
-  const std::function<void(S32, S32)> propagateTag = [this, &tagMatrix, &currentTag, &foundTwin, &propagateTag](S32 i,
-                                                                                                                S32 j) {
+  using PositionFunction = std::function<void(S32, S32)>;
+  const PositionFunction propagateTag = [this, &tagMatrix, &currentTag, &foundTwin, &propagateTag](S32 i, S32 j) {
     if (!hasTile(i, j)) {
       return;
     }
@@ -225,7 +212,7 @@ std::vector<Board> Board::splitComponents() const {
       propagateTag(i, j + 1);
       propagateTag(i + 1, j);
     } else if (tagMatrix[i][j] != currentTag) {
-      throw std::runtime_error("Should not happen: a tag found an already existing tag.");
+      throw std::runtime_error("Should not happen: found a tile tagged with another tag while propagating a tag.");
     }
   };
   for (S32 i = 0; i < rowCount; i++) {
@@ -239,15 +226,20 @@ std::vector<Board> Board::splitComponents() const {
     }
   }
   const auto componentCount = currentTag;
-  Board emptyBoard(
-      std::vector<std::vector<std::optional<Tile>>>(rowCount, std::vector<std::optional<Tile>>(columnCount)));
-  std::vector<Board> components(componentCount, emptyBoard);
+  const auto emptyRow = std::vector<std::optional<Tile>>(columnCount);
+  using TileMatrix = std::vector<std::vector<std::optional<Tile>>>;
+  const auto emptyTileMatrix = TileMatrix(rowCount, emptyRow);
+  auto tileMatrices = std::vector<TileMatrix>(componentCount, emptyTileMatrix);
   for (S32 i = 0; i < rowCount; i++) {
     for (S32 j = 0; j < columnCount; j++) {
       if (tagMatrix[i][j] != NoTag) {
-        components[tagMatrix[i][j]].matrix[i][j] = getTile(i, j);
+        tileMatrices[tagMatrix[i][j]][i][j] = getTile(i, j);
       }
     }
+  }
+  auto components = std::vector<Board>{};
+  for (const auto &tileMatrix : tileMatrices) {
+    components.emplace_back(tileMatrix);
   }
   return components;
 }

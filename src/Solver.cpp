@@ -63,7 +63,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     return Solution(initialState.getClickPositionVector(), true);
   }
   const auto mayNeedMultipleClicks = initialState.board.mayNeedMultipleClicks();
-  const auto canBeSolvedOptimallyDirectionally = initialState.board.canBeSolvedOptimallyDirectionally();
   std::queue<State> stateQueue;
   stateQueue.push(initialState);
   std::optional<Solution> solution;
@@ -83,14 +82,9 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     const auto state = stateQueue.front();
     stateQueue.pop();
     auto derivedState = state;
-    for (S32 i = 0; i < n; i++) {
-      if (canBeSolvedOptimallyDirectionally) {
-        // TODO: could also skip trying to click in the first rows.
-        if (state.board.hasUnsolvedTilesAtRow(i - 2)) {
-          break;
-        }
-      }
-      for (S32 j = 0; j < m; j++) {
+    auto exploring = true;
+    for (S32 i = 0; i < n && exploring; i++) {
+      for (S32 j = 0; j < m && exploring; j++) {
         if (!state.board.hasTile(i, j)) {
           continue;
         }
@@ -107,21 +101,44 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
           continue;
         }
         if (flippingOnlyUp) {
-          if (state.board.getTile(i, j).up) {
+          if (!state.board.getTile(i, j).up) {
             continue;
           }
         }
-        derivedState.board = state.board;
-        derivedState.board.activate(i, j);
-        derivedState.click(i, j);
-        if (!solution && derivedState.board.isSolved()) {
-          solution = Solution(derivedState.getClickPositionVector(), !flippingOnlyUp);
+        const auto click = [&solution, &derivedState, &state, flippingOnlyUp, &stateQueue, &seenBoards](S32 i, S32 j) {
+          derivedState.board = state.board;
+          derivedState.board.activate(i, j);
+          derivedState.click(i, j);
+          if (!solution && derivedState.board.isSolved()) {
+            solution = Solution(derivedState.getClickPositionVector(), !flippingOnlyUp);
+          }
+          if (seenBoards.count(derivedState.board) == 0) {
+            stateQueue.push(derivedState);
+            seenBoards.insert(derivedState.board);
+          }
+          derivedState.clicked.pop_back();
+        };
+        const auto clickTileIfExists = [&state, &click](S32 i, S32 j) {
+          if (state.board.hasTile(i, j)) {
+            click(i, j);
+          }
+        };
+        const auto considerClickingTileAndNeighbors = [&clickTileIfExists](S32 centerI, S32 centerJ) {
+          clickTileIfExists(centerI, centerJ);
+          clickTileIfExists(centerI - 1, centerJ);
+          clickTileIfExists(centerI, centerJ - 1);
+          clickTileIfExists(centerI, centerJ + 1);
+          clickTileIfExists(centerI + 1, centerJ);
+        };
+        if (state.board.canBeSolvedInAnyOrder()) {
+          // Temporary: if we can solve this directionally, don't try all possible clicks for a board.
+          if (state.board.getTile(i, j).up || state.board.getTile(i, j).type == TileType::Blocked) {
+            considerClickingTileAndNeighbors(i, j);
+            exploring = false;
+          }
+        } else {
+          clickTileIfExists(i, j);
         }
-        if (seenBoards.count(derivedState.board) == 0) {
-          stateQueue.push(derivedState);
-          seenBoards.insert(derivedState.board);
-        }
-        derivedState.clicked.pop_back();
       }
     }
     exploredNodes++;
@@ -131,7 +148,8 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
       return solution.value();
     }
   }
-  throw std::runtime_error("Could not find a solution.");
+  const auto exploredNodeCount = toPluralizedString(exploredNodes, "node");
+  throw std::runtime_error("Could not find a solution after exploring " + exploredNodeCount + ".");
 }
 
 Solution Solver::findSolution(const Board &initialBoard) const {

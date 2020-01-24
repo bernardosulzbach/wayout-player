@@ -1,0 +1,15 @@
+D0 D1 D0    D1 D1
+D1 P0    P1    D0
+D0    D1    D0 P1
+   D0 P0    D1 D0
+Found 1 component.
+Found an optimal solution with 5 clicks:
+  (0, 5)
+  (2, 5)
+  (1, 1)
+  (2, 2)
+  (3, 4)
+Explored nodes: 2,334
+Distinct nodes found: 5,064
+Mean branching factor: 2.17
+Used 7,696,384 B (8 MiB) of memory.
