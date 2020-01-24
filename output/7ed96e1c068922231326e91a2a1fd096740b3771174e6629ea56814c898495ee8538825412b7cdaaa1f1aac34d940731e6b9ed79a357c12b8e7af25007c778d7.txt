@@ -5,6 +5,6 @@ Found an optimal solution with 2 clicks:
   (0, 1)
   (0, 1)
 Explored nodes: 2
-Distinct nodes found: 7
-Mean branching factor: 3.50
-Used 6,840,320 B (7 MiB) of memory.
+Distinct nodes found: 6
+Mean branching factor: 3.00
+Used 6,873,088 B (7 MiB) of memory.
