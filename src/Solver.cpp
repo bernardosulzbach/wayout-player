@@ -63,7 +63,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
     return Solution(initialState.getClickPositionVector(), true);
   }
   const auto mayNeedMultipleClicks = initialState.board.mayNeedMultipleClicks();
-  const auto canBeSolvedOptimallyDirectionally = initialState.board.canBeSolvedOptimallyDirectionally();
   std::queue<State> stateQueue;
   stateQueue.push(initialState);
   std::optional<Solution> solution;
@@ -71,11 +70,6 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
   const auto maximumStateQueueSize = configuration.getMaximumStateQueueSize();
   const auto maximumBoardHashTableSize = configuration.getMaximumBoardHashTableSize();
   const auto flippingOnlyUp = configuration.isFlippingOnlyUp();
-  if (configuration.isVerbose()) {
-    if (canBeSolvedOptimallyDirectionally) {
-      std::cout << "Can be solved from any direction." << '\n';
-    }
-  }
   while (!stateQueue.empty()) {
     if (stateQueue.size() > maximumStateQueueSize) {
       const auto limitString = std::to_string(maximumStateQueueSize);
@@ -136,7 +130,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
           clickTileIfExists(centerI, centerJ + 1);
           clickTileIfExists(centerI + 1, centerJ);
         };
-        if (canBeSolvedOptimallyDirectionally) {
+        if (state.board.canBeSolvedInAnyOrder()) {
           // Temporary: if we can solve this directionally, don't try all possible clicks for a board.
           if (state.board.getTile(i, j).up || state.board.getTile(i, j).type == TileType::Blocked) {
             considerClickingTileAndNeighbors(i, j);

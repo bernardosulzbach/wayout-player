@@ -30,20 +30,13 @@ public:
   [[nodiscard]] bool mayNeedMultipleClicks() const;
 
   /**
-   * Returns whether or not this board can be solved optimally by clearing it in any direction.
-   *
-   * A board that can be solved optimally in any direction has optimal solutions that involve lowering all raised tiles
-   * in a file before clicking any tiles which are two or more files after this file.
-   *
-   * This function may return false in cases where a board could be solved optimally by clearing it in any direction.
+   * Returns whether or not this board can be solved optimally in any order.
    */
-  [[nodiscard]] bool canBeSolvedOptimallyDirectionally() const;
+  [[nodiscard]] bool canBeSolvedInAnyOrder() const;
 
   void safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory &history);
 
   explicit Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix);
-
-  [[nodiscard]] bool hasUnsolvedTilesAtRow(IndexType i) const;
 
   [[nodiscard]] bool hasTile(IndexType i, IndexType j) const;
 

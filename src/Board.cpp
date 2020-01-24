@@ -16,7 +16,7 @@ bool Board::mayNeedMultipleClicks() const {
   return startedWithBlockedTiles;
 }
 
-bool Board::canBeSolvedOptimallyDirectionally() const {
+bool Board::canBeSolvedInAnyOrder() const {
   for (S32 i = 0; i < getRowCount(); i++) {
     for (S32 j = 0; j < getColumnCount(); j++) {
       if (hasTile(i, j)) {
@@ -85,20 +85,6 @@ Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(
       }
     }
   }
-}
-
-bool Board::hasUnsolvedTilesAtRow(IndexType i) const {
-  if (i < 0 || i >= getRowCount()) {
-    return false;
-  }
-  for (S32 j = 0; j < getColumnCount(); j++) {
-    if (hasTile(i, j)) {
-      if (matrix[i][j]->up || matrix[i][j]->type == TileType::Blocked) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 bool Board::hasTile(IndexType i, IndexType j) const {
