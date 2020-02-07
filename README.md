@@ -6,7 +6,7 @@ An automated player for the [Wayout](https://store.steampowered.com/app/551110/W
 
 # Building
 
-A complete script for building and running this project is `build.sh`.
+A complete script for building and running this project is [`build.sh`](build.sh).
 
 # Running
 
