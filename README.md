@@ -17,6 +17,9 @@ A complete script for building and running this project is [`build.sh`](build.sh
 systemd-run --scope -p MemoryMax=1G ./player ../input/$INPUT.txt
 ```
 
+## Inputs
+
+The boards may be supplied in a textual format as exemplified by the inputs in the repository.
 The inputs are organized by the [SHA-512](https://en.wikipedia.org/wiki/SHA-2) of the file contents.
 The Python 3 script [`reorganize_inputs.py`](scripts/reorganize_inputs.py) organizes them by this.
 
