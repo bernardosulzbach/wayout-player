@@ -18,7 +18,7 @@ systemd-run --scope -p MemoryMax=1G ./player ../input/$INPUT.txt
 ```
 
 The inputs are organized by the [SHA-512](https://en.wikipedia.org/wiki/SHA-2) of the file contents.
-The Python 3 script `reorganize_inputs.py` organizes them by this.
+The Python 3 script [`reorganize_inputs.py`](scripts/reorganize_inputs.py) organizes them by this.
 
 # License
 
