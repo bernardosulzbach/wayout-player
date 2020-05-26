@@ -23,6 +23,14 @@ The boards may be supplied in a textual format as exemplified by the inputs in t
 The inputs are organized by the [SHA-512](https://en.wikipedia.org/wiki/SHA-2) of the file contents.
 The Python 3 script [`reorganize_inputs.py`](scripts/reorganize_inputs.py) organizes them by this.
 
+# The game
+
+## Important shortcuts
+
+Wayout does not have a menu, the following shortcuts may be useful to you.
++ B - turns on/off background animations
++ S - turns on/off windowed mode
+
 # License
 
 The code is licensed under the [BSD 3-Clause "New" or "Revised" License](LICENSE).
