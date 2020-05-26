@@ -45,6 +45,12 @@ add_library(
   src/SystemInformation.hpp
   src/Board.cpp
   src/Board.hpp
+  src/BoardScanner.hpp
+  src/BoardScanner.cpp
+  src/Image.hpp
+  src/Image.cpp
+  src/Pixel.cpp
+  src/Pixel.hpp
   src/Types.hpp
   src/Position.cpp
   src/Position.hpp
