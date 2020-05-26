@@ -34,6 +34,9 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_library(
   wayout-player OBJECT
   src/ArgumentParser.cpp
@@ -65,16 +68,17 @@ add_library(
 find_package(Threads REQUIRED)
 
 add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
-target_link_libraries(test ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(test ${OPENSSL_SSL_LIBRARY})
-target_link_libraries(test ${Boost_LIBRARIES})
-target_link_libraries(test ${CMAKE_THREAD_LIBS_INIT})
+
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_SSL_LIBRARY})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${Boost_LIBRARIES})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OpenCV_LIBS})
+
+target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
-target_link_libraries(player ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(player ${OPENSSL_SSL_LIBRARY})
-target_link_libraries(player ${Boost_LIBRARIES})
-target_link_libraries(player ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(player ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 if(HAS_IPO_SUPPORT)
   message(STATUS "IPO enabled")
