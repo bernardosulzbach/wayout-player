@@ -8,6 +8,9 @@ An automated player for the [Wayout](https://store.steampowered.com/app/551110/W
 
 A complete script for building and running this project is [`build.sh`](build.sh).
 
+The Travis CI pipeline uses Ubuntu Focal Fossa (20.04), CMake 3.12.4, Clang 7.0.0, GCC 9.3.0, Boost 1.71, OpenSSL 1.1.1f, and OpenCV 4.2.0.
+You may need other dependencies as well.
+
 # Running
 
 ```bash
