@@ -11,5 +11,6 @@ addons:
       - build-essential
       - cmake
       - libboost-all-dev
+      - libopencv-dev
 
 script: mkdir build && cd build && cmake .. && make && ./test
