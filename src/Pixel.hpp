@@ -20,6 +20,13 @@ public:
   [[nodiscard]] U8 getB() const;
   U8 &getB();
 
+  /**
+   * Returns the CIELAB (CIE L*a*b*) lightness of this pixel.
+   *
+   * This value is guaranteed to be in the [0.0, 100.0] range.
+   */
+  [[nodiscard]] F32 getLightness() const;
+
   bool operator==(const Pixel &rhs) const;
   bool operator!=(const Pixel &rhs) const;
 };

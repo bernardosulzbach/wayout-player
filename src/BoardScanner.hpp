@@ -5,8 +5,8 @@
 
 namespace WayoutPlayer {
 class BoardScanner {
-  Board scan(const Image &image) {
-    return Board(std::vector<std::vector<std::optional<Tile>>>{});
-  }
+public:
+  BoardScanner();
+  Board scan(const Image &image);
 };
 } // namespace WayoutPlayer

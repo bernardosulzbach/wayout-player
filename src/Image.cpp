@@ -2,7 +2,6 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
 
 namespace WayoutPlayer {
 Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Pixel>(imageWidth)) {
@@ -25,6 +24,18 @@ Pixel Image::getPixel(U32 i, U32 j) const {
 
 void Image::setPixel(U32 i, U32 j, Pixel pixel) {
   data[i][j] = pixel;
+}
+
+Mask Image::findPixels(const std::function<bool(Pixel)> &predicate) const {
+  Mask mask(getHeight(), getWidth());
+  for (U32 i = 0; i < getHeight(); i++) {
+    for (U32 j = 0; j < getWidth(); j++) {
+      if (predicate(getPixel(i, j))) {
+        mask.setValue(i, j, true);
+      }
+    }
+  }
+  return mask;
 }
 
 bool Image::operator==(const Image &rhs) const {

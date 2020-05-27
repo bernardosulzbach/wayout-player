@@ -74,9 +74,8 @@ void Board::safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory 
 }
 
 Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(std::move(tileMatrix)) {
-  const auto firstRowSize = matrix.front().size();
   for (const auto &row : matrix) {
-    if (row.size() != firstRowSize) {
+    if (row.size() != matrix.front().size()) {
       throw std::invalid_argument("Matrix is not rectangular.");
     }
     for (const auto tile : row) {

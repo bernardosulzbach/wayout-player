@@ -6,6 +6,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../src/Board.hpp"
+#include "../src/BoardScanner.hpp"
 #include "../src/Hashing.hpp"
 #include "../src/Image.hpp"
 #include "../src/Solver.hpp"
@@ -279,4 +280,41 @@ BOOST_AUTO_TEST_CASE(readingAndWritingImageToFiles) {
   image.writeImageToFile(sampleImagePath);
   const auto readImage = readImageFromFile(sampleImagePath);
   BOOST_CHECK(image == readImage);
+}
+
+BOOST_AUTO_TEST_CASE(shouldCorrectlyFindPixelValuesInImages) {
+  Image image(4, 4);
+  const auto diagonalPixel = Pixel(0, 1, 2);
+  const auto nonDiagonalPixel = Pixel(2, 1, 0);
+  for (U32 i = 0; i < image.getHeight(); i++) {
+    for (U32 j = 0; j < image.getWidth(); j++) {
+      if (i == j) {
+        image.setPixel(i, j, diagonalPixel);
+      } else {
+        image.setPixel(i, j, nonDiagonalPixel);
+      }
+    }
+  }
+  const auto mask = image.findPixels([diagonalPixel](const Pixel pixel) { return pixel == diagonalPixel; });
+  for (U32 i = 0; i < image.getHeight(); i++) {
+    for (U32 j = 0; j < image.getWidth(); j++) {
+      BOOST_CHECK((i == j) == mask.getValue(i, j));
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(shouldCorrectlyEvaluateLightness) {
+  const auto threshold = 1.0;
+  BOOST_CHECK_CLOSE(Pixel(0, 0, 0).getLightness(), 0.0, threshold);
+  BOOST_CHECK_CLOSE(Pixel(31, 63, 127).getLightness(), 27.79, threshold);
+  BOOST_CHECK_CLOSE(Pixel(63, 63, 63).getLightness(), 26.65, threshold);
+  BOOST_CHECK_CLOSE(Pixel(63, 127, 191).getLightness(), 51.83, threshold);
+  BOOST_CHECK_CLOSE(Pixel(127, 127, 127).getLightness(), 53.19, threshold);
+  BOOST_CHECK_CLOSE(Pixel(255, 255, 255).getLightness(), 100.0, threshold);
+}
+
+BOOST_AUTO_TEST_CASE(boardScannerFiltering) {
+  BoardScanner boardScanner;
+  const auto image = readImageFromFile("../images/level-1.png");
+  boardScanner.scan(image);
 }

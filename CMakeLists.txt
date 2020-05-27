@@ -51,6 +51,8 @@ add_library(
   src/Image.cpp
   src/Pixel.cpp
   src/Pixel.hpp
+  src/Mask.cpp
+  src/Mask.hpp
   src/Types.hpp
   src/Position.cpp
   src/Position.hpp
