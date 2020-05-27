@@ -1,10 +1,13 @@
 #define BOOST_TEST_MODULE Tests
 #define BOOST_TEST_DYN_LINK
 
+#include <filesystem>
+
 #include <boost/test/unit_test.hpp>
 
 #include "../src/Board.hpp"
 #include "../src/Hashing.hpp"
+#include "../src/Image.hpp"
 #include "../src/Solver.hpp"
 #include "../src/TileType.hpp"
 
@@ -258,4 +261,22 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
   BOOST_CHECK(components.size() == 1);
   BOOST_CHECK(components.front() == board);
   BOOST_CHECK(Board::mergeComponents(components) == board);
+}
+
+BOOST_AUTO_TEST_CASE(readingAndWritingImageToFiles) {
+  auto temporaryDirectoryPath = std::filesystem::temp_directory_path();
+  Image image(128, 128);
+  Pixel pixel;
+  for (U32 i = 0; i < image.getHeight(); i++) {
+    for (U32 j = 0; j < image.getWidth(); j++) {
+      pixel.getR() = i;
+      pixel.getG() = j;
+      pixel.getB() = i + j;
+      image.setPixel(i, j, pixel);
+    }
+  }
+  const auto sampleImagePath = temporaryDirectoryPath / "sample-image.png";
+  image.writeImageToFile(sampleImagePath);
+  const auto readImage = readImageFromFile(sampleImagePath);
+  BOOST_CHECK(image == readImage);
 }

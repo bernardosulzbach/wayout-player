@@ -15,25 +15,21 @@ class Image {
   std::vector<std::vector<Pixel>> data;
 
 public:
-  Image(U32 imageWidth, U32 imageHeight);
+  Image(U32 imageHeight, U32 imageWidth);
 
-  [[nodiscard]] U32 getWidth() const {
-    if (data.empty()) {
-      return 0;
-    }
-    return data.front().size();
-  }
+  [[nodiscard]] U32 getWidth() const;
 
-  [[nodiscard]] U32 getHeight() const {
-    return data.size();
-  }
+  [[nodiscard]] U32 getHeight() const;
 
-  [[nodiscard]] Pixel getPixel(U32 i, U32 j) const {
-    return data.at(i).at(j);
-  }
+  [[nodiscard]] Pixel getPixel(U32 i, U32 j) const;
 
-  void saveImageToFile(const std::filesystem::path &path);
+  void setPixel(U32 i, U32 j, Pixel pixel);
+
+  void writeImageToFile(const std::filesystem::path &path) const;
+
+  bool operator==(const Image &rhs) const;
+  bool operator!=(const Image &rhs) const;
 };
 
-Image loadImageFromFile(const std::filesystem::path &path);
+Image readImageFromFile(const std::filesystem::path &path);
 } // namespace WayoutPlayer
