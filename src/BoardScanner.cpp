@@ -9,8 +9,10 @@ namespace WayoutPlayer {
 BoardScanner::BoardScanner() = default;
 
 Board BoardScanner::scan(const Image &image) {
-  // Find the black edges.
-  const auto mask = image.findPixels([](const Color pixel) { return pixel.getLightness() <= 35.0; });
+  // Find the darkest edges.
+  auto mask = image.findPixels([](const Color color) { return color.getLightness() <= 25.0; });
+  // Open them by including their lighter neighbors.
+  mask.open([&image](const U32 i, const U32 j) { return image.getPixel(i, j).getLightness() <= 31.25; });
   auto imageCopy = image;
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "Color.hpp"
 #include "Types.hpp"
 
 namespace WayoutPlayer {
@@ -22,6 +23,8 @@ public:
   [[nodiscard]] U32 getWidth() const;
 
   [[nodiscard]] bool getValue(U32 i, U32 j) const;
+
+  void open(const std::function<bool(U32, U32)> &predicate);
 
   void setValue(U32 i, U32 j, bool value);
 };
