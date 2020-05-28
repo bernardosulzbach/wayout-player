@@ -8,7 +8,7 @@ class IntegralScreenCoordinates {
   U32 j{};
 
 public:
-  IntegralScreenCoordinates(U32 i, U32 j);
+  IntegralScreenCoordinates(U32 screenI, U32 screenJ);
 
   [[nodiscard]] U32 getI() const;
 

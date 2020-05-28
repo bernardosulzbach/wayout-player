@@ -10,7 +10,7 @@ public:
   bool up = false;
   TileType type = TileType::Default;
 
-  Tile(bool up, TileType type);
+  Tile(bool tileUp, TileType tileType);
   [[nodiscard]] std::string toString() const;
 
   bool operator==(const Tile &rhs) const;

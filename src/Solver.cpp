@@ -70,7 +70,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
   const auto configuration = getSolverConfiguration();
   const auto maximumStateQueueSize = configuration.getMaximumStateQueueSize();
   const auto maximumBoardHashTableSize = configuration.getMaximumBoardHashTableSize();
-  const auto flippingOnlyUp = configuration.isFlippingOnlyUp();
+  const auto flipOnlyUp = configuration.isFlippingOnlyUp();
   if (configuration.isVerbose()) {
     if (canBeSolvedOptimallyDirectionally) {
       std::cout << "Can be solved from any direction." << '\n';
@@ -106,17 +106,17 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
         if (state.board.getTile(i, j).type == TileType::Blocked) {
           continue;
         }
-        if (flippingOnlyUp) {
+        if (flipOnlyUp) {
           if (!state.board.getTile(i, j).up) {
             continue;
           }
         }
-        const auto click = [&solution, &derivedState, &state, flippingOnlyUp, &stateQueue, &seenBoards](S32 i, S32 j) {
+        const auto click = [&solution, &derivedState, &state, flipOnlyUp, &stateQueue, &seenBoards](S32 ti, S32 tj) {
           derivedState.board = state.board;
-          derivedState.board.activate(i, j);
-          derivedState.click(i, j);
+          derivedState.board.activate(ti, tj);
+          derivedState.click(ti, tj);
           if (!solution && derivedState.board.isSolved()) {
-            solution = Solution(derivedState.getClickPositionVector(), !flippingOnlyUp);
+            solution = Solution(derivedState.getClickPositionVector(), !flipOnlyUp);
           }
           if (seenBoards.count(derivedState.board) == 0) {
             stateQueue.push(derivedState);
@@ -124,9 +124,9 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
           }
           derivedState.clicked.pop_back();
         };
-        const auto clickTileIfExists = [&state, &click](S32 i, S32 j) {
-          if (state.board.hasTile(i, j)) {
-            click(i, j);
+        const auto clickTileIfExists = [&state, &click](S32 ti, S32 tj) {
+          if (state.board.hasTile(ti, tj)) {
+            click(ti, tj);
           }
         };
         const auto considerClickingTileAndNeighbors = [&clickTileIfExists](S32 centerI, S32 centerJ) {

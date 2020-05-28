@@ -5,7 +5,7 @@
 #include <opencv2/imgproc.hpp>
 
 namespace WayoutPlayer {
-Color::Color(U8 r, U8 g, U8 b) : r(r), g(g), b(b) {
+Color::Color(U8 rChannel, U8 gChannel, U8 bChannel) : r(rChannel), g(gChannel), b(bChannel) {
 }
 
 Color Color::fromHSV(F32 h, F32 s, F32 v) {

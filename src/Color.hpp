@@ -11,7 +11,7 @@ class Color {
 public:
   Color() = default;
 
-  Color(U8 r, U8 g, U8 b);
+  Color(U8 rChannel, U8 gChannel, U8 bChannel);
 
   static Color fromHSV(F32 h, F32 s, F32 v);
 
