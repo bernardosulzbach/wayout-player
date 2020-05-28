@@ -200,14 +200,12 @@ std::vector<Board> Board::splitComponents() const {
     if (tagMatrix[i][j] == NoTag) {
       tagMatrix[i][j] = currentTag;
       // Propagate to all other twins.
-      const auto rowCount = getRowCount();
-      const auto columnCount = getColumnCount();
       if (getTile(i, j).type == TileType::Twin) {
         // This check is important to prevent an infinite recursion.
         if (!foundTwin) {
           foundTwin = true;
-          for (S32 oi = 0; oi < rowCount; oi++) {
-            for (S32 oj = 0; oj < columnCount; oj++) {
+          for (S32 oi = 0; oi < getRowCount(); oi++) {
+            for (S32 oj = 0; oj < getColumnCount(); oj++) {
               if (oi == i && oj == j) {
                 continue;
               }
