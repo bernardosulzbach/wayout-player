@@ -15,7 +15,7 @@ addons:
       - libopencv-dev
 
 script:
-  - diff <(la src | grep -i hpp | wc -l) <(git grep "namespace WayoutPlayer {" | grep -i hpp | wc -l)
+  - diff <(ls -l src | grep -i hpp | wc -l) <(git grep "namespace WayoutPlayer {" | grep -i hpp | wc -l)
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
