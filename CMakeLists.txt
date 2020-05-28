@@ -39,20 +39,26 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_library(
   wayout-player OBJECT
+  src/Argument.cpp
+  src/Argument.hpp
+  src/ArgumentFactory.cpp
+  src/ArgumentFactory.hpp
   src/ArgumentParser.cpp
   src/ArgumentParser.hpp
   src/SystemInformation.cpp
   src/SystemInformation.hpp
   src/Board.cpp
   src/Board.hpp
-  src/BoardScanner.hpp
   src/BoardScanner.cpp
-  src/Image.hpp
+  src/BoardScanner.hpp
   src/Image.cpp
-  src/Pixel.cpp
-  src/Pixel.hpp
+  src/Image.hpp
+  src/Color.cpp
+  src/Color.hpp
   src/Mask.cpp
   src/Mask.hpp
+  src/MaskComponentFinder.cpp
+  src/MaskComponentFinder.hpp
   src/Types.hpp
   src/Position.cpp
   src/Position.hpp

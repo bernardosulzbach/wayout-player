@@ -4,7 +4,7 @@
 #include <opencv2/imgcodecs.hpp>
 
 namespace WayoutPlayer {
-Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Pixel>(imageWidth)) {
+Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Color>(imageWidth)) {
 }
 
 U32 Image::getHeight() const {
@@ -18,15 +18,15 @@ U32 Image::getWidth() const {
   return data.front().size();
 }
 
-Pixel Image::getPixel(U32 i, U32 j) const {
+Color Image::getPixel(U32 i, U32 j) const {
   return data[i][j];
 }
 
-void Image::setPixel(U32 i, U32 j, Pixel pixel) {
+void Image::setPixel(U32 i, U32 j, Color pixel) {
   data[i][j] = pixel;
 }
 
-Mask Image::findPixels(const std::function<bool(Pixel)> &predicate) const {
+Mask Image::findPixels(const std::function<bool(Color)> &predicate) const {
   Mask mask(getHeight(), getWidth());
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
@@ -76,7 +76,7 @@ Image readImageFromFile(const std::filesystem::path &path) {
       const auto b = cvPixel[0];
       const auto g = cvPixel[1];
       const auto r = cvPixel[2];
-      image.setPixel(i, j, Pixel(r, g, b));
+      image.setPixel(i, j, Color(r, g, b));
     }
   }
   return image;

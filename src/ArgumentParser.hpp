@@ -1,14 +1,20 @@
 #pragma once
 
-#include <optional>
+#include "Argument.hpp"
+
 #include <string>
+#include <unordered_map>
 #include <vector>
 
+namespace WayoutPlayer {
 class ArgumentParser {
-  std::vector<std::string> arguments;
+  std::unordered_map<Argument, std::vector<std::string>> arguments;
 
 public:
-  void parseArguments(int argc, char **argv);
+  ArgumentParser(const std::vector<std::string> &commandLineArguments);
 
-  std::string getArgument(std::size_t position) const;
+  [[nodiscard]] bool hasArgument(const Argument &argument) const;
+
+  [[nodiscard]] std::vector<std::string> getArgument(const Argument &argument) const;
 };
+} // namespace WayoutPlayer

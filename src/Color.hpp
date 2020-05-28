@@ -3,15 +3,17 @@
 #include "Types.hpp"
 
 namespace WayoutPlayer {
-class Pixel {
+class Color {
   U8 r{};
   U8 g{};
   U8 b{};
 
 public:
-  Pixel() = default;
+  Color() = default;
 
-  Pixel(U8 r, U8 g, U8 b);
+  Color(U8 r, U8 g, U8 b);
+
+  static Color fromHSV(F32 h, F32 s, F32 v);
 
   [[nodiscard]] U8 getR() const;
   U8 &getR();
@@ -27,7 +29,7 @@ public:
    */
   [[nodiscard]] F32 getLightness() const;
 
-  bool operator==(const Pixel &rhs) const;
-  bool operator!=(const Pixel &rhs) const;
+  bool operator==(const Color &rhs) const;
+  bool operator!=(const Color &rhs) const;
 };
 } // namespace WayoutPlayer

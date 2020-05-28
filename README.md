@@ -17,7 +17,7 @@ You may need other dependencies as well.
 # Because this process can use a TON of RAM, limiting it is a good idea.
 # If you run with no swap, it is basically a requirement to ensure system stability.
 # The following line limits the memory usage to 1 GiB on Linux.
-systemd-run --scope -p MemoryMax=1G ./player ../input/$INPUT.txt
+systemd-run --scope -p MemoryMax=1G ./player --input ../input/$INPUT.txt
 ```
 
 ## Inputs

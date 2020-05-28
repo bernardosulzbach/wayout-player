@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
 BOOST_AUTO_TEST_CASE(readingAndWritingImageToFiles) {
   auto temporaryDirectoryPath = std::filesystem::temp_directory_path();
   Image image(128, 128);
-  Pixel pixel;
+  Color pixel;
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
       pixel.getR() = i;
@@ -284,8 +284,8 @@ BOOST_AUTO_TEST_CASE(readingAndWritingImageToFiles) {
 
 BOOST_AUTO_TEST_CASE(shouldCorrectlyFindPixelValuesInImages) {
   Image image(4, 4);
-  const auto diagonalPixel = Pixel(0, 1, 2);
-  const auto nonDiagonalPixel = Pixel(2, 1, 0);
+  const auto diagonalPixel = Color(0, 1, 2);
+  const auto nonDiagonalPixel = Color(2, 1, 0);
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
       if (i == j) {
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE(shouldCorrectlyFindPixelValuesInImages) {
       }
     }
   }
-  const auto mask = image.findPixels([diagonalPixel](const Pixel pixel) { return pixel == diagonalPixel; });
+  const auto mask = image.findPixels([diagonalPixel](const Color pixel) { return pixel == diagonalPixel; });
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
       BOOST_CHECK((i == j) == mask.getValue(i, j));
@@ -305,16 +305,10 @@ BOOST_AUTO_TEST_CASE(shouldCorrectlyFindPixelValuesInImages) {
 
 BOOST_AUTO_TEST_CASE(shouldCorrectlyEvaluateLightness) {
   const auto threshold = 1.0;
-  BOOST_CHECK_CLOSE(Pixel(0, 0, 0).getLightness(), 0.0, threshold);
-  BOOST_CHECK_CLOSE(Pixel(31, 63, 127).getLightness(), 27.79, threshold);
-  BOOST_CHECK_CLOSE(Pixel(63, 63, 63).getLightness(), 26.65, threshold);
-  BOOST_CHECK_CLOSE(Pixel(63, 127, 191).getLightness(), 51.83, threshold);
-  BOOST_CHECK_CLOSE(Pixel(127, 127, 127).getLightness(), 53.19, threshold);
-  BOOST_CHECK_CLOSE(Pixel(255, 255, 255).getLightness(), 100.0, threshold);
-}
-
-BOOST_AUTO_TEST_CASE(boardScannerFiltering) {
-  BoardScanner boardScanner;
-  const auto image = readImageFromFile("../images/level-1.png");
-  boardScanner.scan(image);
+  BOOST_CHECK_CLOSE(Color(0, 0, 0).getLightness(), 0.0, threshold);
+  BOOST_CHECK_CLOSE(Color(31, 63, 127).getLightness(), 27.79, threshold);
+  BOOST_CHECK_CLOSE(Color(63, 63, 63).getLightness(), 26.65, threshold);
+  BOOST_CHECK_CLOSE(Color(63, 127, 191).getLightness(), 51.83, threshold);
+  BOOST_CHECK_CLOSE(Color(127, 127, 127).getLightness(), 53.19, threshold);
+  BOOST_CHECK_CLOSE(Color(255, 255, 255).getLightness(), 100.0, threshold);
 }
