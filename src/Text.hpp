@@ -5,6 +5,7 @@
 
 #include "Types.hpp"
 
+namespace WayoutPlayer {
 struct ThousandsFacet : public std::numpunct<char> {
   explicit ThousandsFacet(std::size_t refs = 0) : std::numpunct<char>(refs) {
   }
@@ -26,3 +27,4 @@ template <typename T> std::string integerToStringWithThousandSeparators(T t) {
 }
 
 std::string toPluralizedString(U64 count, const std::string &singular);
+} // namespace WayoutPlayer
