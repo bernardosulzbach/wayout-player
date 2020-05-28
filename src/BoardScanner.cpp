@@ -1,5 +1,6 @@
 #include "BoardScanner.hpp"
 
+#include <iostream>
 #include <unordered_set>
 #include <utility>
 
@@ -44,12 +45,16 @@ Board BoardScanner::scan(const Image &image) {
     }
     for (U32 i = 0; i < componentFinder.getHeight(); i++) {
       for (U32 j = 0; j < componentFinder.getWidth(); j++) {
-        const auto component = componentFinder.getComponent(i, j);
-        if (!componentsOfInterest.contains(component)) {
+        const auto componentId = componentFinder.getComponentId(i, j);
+        if (!componentsOfInterest.contains(componentId)) {
           continue;
         }
-        imageCopy.setPixel(i, j, componentOfInterestColor[component]);
+        imageCopy.setPixel(i, j, componentOfInterestColor[componentId]);
       }
+    }
+    for (const auto componentId : componentsOfInterest) {
+      const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
+      imageCopy.setPixel(coordinates.getI(), coordinates.getJ(), Color(255, 31, 31));
     }
     if (debuggingPath) {
       imageCopy.writeImageToFile(debuggingPath.value() / "components.png");

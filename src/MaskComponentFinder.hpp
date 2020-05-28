@@ -4,6 +4,7 @@
 #include <queue>
 #include <vector>
 
+#include "Centroid.hpp"
 #include "Mask.hpp"
 #include "Types.hpp"
 
@@ -13,7 +14,7 @@ class MaskComponentFinder {
 
   std::vector<std::vector<IdType>> componentId;
   IdType componentCount{};
-  std::vector<IdType> componentSize;
+  std::vector<Centroid> componentCentroid;
 
   void findComponents(const Mask &mask);
 
@@ -26,10 +27,12 @@ public:
 
   [[nodiscard]] U32 getWidth() const;
 
-  [[nodiscard]] IdType getComponent(U32 i, U32 j) const;
+  [[nodiscard]] IdType getComponentId(U32 i, U32 j) const;
 
   [[nodiscard]] IdType getComponentCount() const;
 
   [[nodiscard]] IdType getComponentSize(IdType component) const;
+
+  [[nodiscard]] Centroid getComponentCentroid(IdType component) const;
 };
 } // namespace WayoutPlayer

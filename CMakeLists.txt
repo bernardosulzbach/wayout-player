@@ -68,6 +68,10 @@ add_library(
   src/Text.hpp
   src/Solver.cpp
   src/Solver.hpp
+  src/Centroid.cpp
+  src/Centroid.hpp
+  src/IntegralScreenCoordinates.cpp
+  src/IntegralScreenCoordinates.hpp
   src/SolverConfiguration.cpp
   src/SolverConfiguration.hpp
   src/TileType.cpp

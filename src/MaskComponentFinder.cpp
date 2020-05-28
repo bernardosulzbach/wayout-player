@@ -22,13 +22,13 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
   };
   for (U32 i = 0; i < mask.getHeight(); i++) {
     for (U32 j = 0; j < mask.getWidth(); j++) {
-      if (mask.getValue(i, j) || getComponent(i, j) != None) {
+      if (mask.getValue(i, j) || getComponentId(i, j) != None) {
         continue;
       }
-      componentSize.emplace_back();
+      componentCentroid.emplace_back();
       std::queue<std::pair<U32, U32>> nextPixels;
       componentId[i][j] = componentCount;
-      componentSize[componentCount]++;
+      componentCentroid[componentCount].add(i, j);
       nextPixels.push({i, j});
       while (!nextPixels.empty()) {
         U32 pi;
@@ -44,7 +44,7 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
           std::tie(ni, nj) = neighbor;
           if (!mask.getValue(ni, nj) && componentId[ni][nj] == None) {
             componentId[ni][nj] = componentCount;
-            componentSize[componentCount]++;
+            componentCentroid[componentCount].add(ni, nj);
             nextPixels.push({ni, nj});
           }
         }
@@ -70,7 +70,7 @@ U32 MaskComponentFinder::getWidth() const {
   return componentId.front().size();
 }
 
-MaskComponentFinder::IdType MaskComponentFinder::getComponent(U32 i, U32 j) const {
+MaskComponentFinder::IdType MaskComponentFinder::getComponentId(U32 i, U32 j) const {
   return componentId[i][j];
 }
 
@@ -78,7 +78,11 @@ MaskComponentFinder::IdType MaskComponentFinder::getComponentCount() const {
   return componentCount;
 }
 
-MaskComponentFinder::IdType MaskComponentFinder::getComponentSize(MaskComponentFinder::IdType component) const {
-  return componentSize[component];
+MaskComponentFinder::IdType MaskComponentFinder::getComponentSize(IdType component) const {
+  return getComponentCentroid(component).getPointCount();
+}
+
+Centroid MaskComponentFinder::getComponentCentroid(IdType component) const {
+  return componentCentroid[component];
 }
 } // namespace WayoutPlayer
