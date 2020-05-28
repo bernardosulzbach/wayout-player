@@ -3,8 +3,8 @@
 #include <utility>
 
 namespace WayoutPlayer {
-Argument::Argument(std::string name, std::string description, U32 arity)
-    : name(std::move(name)), description(std::move(description)), arity(arity) {
+Argument::Argument(std::string argumentName, std::string argumentDescription, U32 argumentArity)
+    : name(std::move(argumentName)), description(std::move(argumentDescription)), arity(argumentArity) {
 }
 
 const std::string &Argument::getName() const {

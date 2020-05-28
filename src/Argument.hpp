@@ -12,7 +12,7 @@ class Argument {
   U32 arity;
 
 public:
-  Argument(std::string name, std::string description, U32 arity);
+  Argument(std::string argumentName, std::string argumentDescription, U32 argumentArity);
 
   [[nodiscard]] const std::string &getName() const;
 
