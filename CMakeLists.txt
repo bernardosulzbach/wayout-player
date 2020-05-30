@@ -34,7 +34,7 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED core imgcodecs imgproc)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_library(
