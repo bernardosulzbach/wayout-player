@@ -1,7 +1,5 @@
 #include "Color.hpp"
 
-#include <cmath>
-
 #include <opencv2/imgproc.hpp>
 
 namespace WayoutPlayer {
@@ -14,6 +12,14 @@ Color Color::fromHSV(F32 h, F32 s, F32 v) {
   cv::cvtColor(source, destination, cv::ColorConversionCodes::COLOR_HSV2RGB);
   const auto result = destination.at<cv::Vec3f>(0, 0) * 255.0f;
   return Color(result[0], result[1], result[2]);
+}
+
+Color Color::getHighContrastGrey() const {
+  if (getLightness() >= 50.0) {
+    return Color(31, 31, 31);
+  } else {
+    return Color(224, 224, 224);
+  }
 }
 
 U8 Color::getR() const {

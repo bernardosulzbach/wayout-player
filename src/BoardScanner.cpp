@@ -54,7 +54,8 @@ Board BoardScanner::scan(const Image &image) {
     }
     for (const auto componentId : componentsOfInterest) {
       const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
-      imageCopy.setPixel(coordinates.getI(), coordinates.getJ(), Color(255, 31, 31));
+      const auto highContrastGrey = componentOfInterestColor[componentId].getHighContrastGrey();
+      imageCopy.setCross(coordinates.getI(), coordinates.getJ(), 5, highContrastGrey);
     }
     if (debuggingPath) {
       imageCopy.writeImageToFile(debuggingPath.value() / "components.png");

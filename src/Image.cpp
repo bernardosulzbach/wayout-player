@@ -18,12 +18,34 @@ U32 Image::getWidth() const {
   return data.front().size();
 }
 
-Color Image::getPixel(U32 i, U32 j) const {
+Color Image::getPixel(const U32 i, const U32 j) const {
   return data[i][j];
 }
 
-void Image::setPixel(U32 i, U32 j, Color pixel) {
-  data[i][j] = pixel;
+void Image::setPixel(const U32 i, const U32 j, const Color color) {
+  data[i][j] = color;
+}
+
+void Image::setCross(const U32 centerI, const U32 centerJ, const U32 diameter, const Color color) {
+  if (diameter == 0) {
+    throw std::invalid_argument("Diameter must be nonzero.");
+  }
+  if (diameter % 2 == 0) {
+    throw std::invalid_argument("Diameter must be odd.");
+  }
+  const auto setPixelIfInImage = [this, color](const S64 i, const S64 j) {
+    if (i < 0 || i >= getHeight() || j < 0 || j >= getWidth()) {
+      return;
+    }
+    setPixel(i, j, color);
+  };
+  setPixelIfInImage(centerI, centerJ);
+  for (S64 distance = 1; distance <= (diameter - 1) / 2; distance++) {
+    setPixelIfInImage(centerI - distance, centerJ);
+    setPixelIfInImage(centerI, centerJ - distance);
+    setPixelIfInImage(centerI, centerJ + distance);
+    setPixelIfInImage(centerI + distance, centerJ);
+  }
 }
 
 Mask Image::findPixels(const std::function<bool(Color)> &predicate) const {

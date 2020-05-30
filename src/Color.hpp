@@ -15,6 +15,8 @@ public:
 
   static Color fromHSV(F32 h, F32 s, F32 v);
 
+  [[nodiscard]] Color getHighContrastGrey() const;
+
   [[nodiscard]] U8 getR() const;
   U8 &getR();
   [[nodiscard]] U8 getG() const;

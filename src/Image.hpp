@@ -25,7 +25,9 @@ public:
 
   [[nodiscard]] Color getPixel(U32 i, U32 j) const;
 
-  void setPixel(U32 i, U32 j, Color pixel);
+  void setPixel(U32 i, U32 j, Color color);
+
+  void setCross(U32 centerI, U32 centerJ, U32 diameter, Color color);
 
   [[nodiscard]] Mask findPixels(const std::function<bool(Color)> &predicate) const;
 
