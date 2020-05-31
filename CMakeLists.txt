@@ -66,6 +66,7 @@ add_library(
   src/Tile.hpp
   src/Text.cpp
   src/Text.hpp
+  src/Numeric.hpp
   src/Solver.cpp
   src/Solver.hpp
   src/Centroid.cpp
