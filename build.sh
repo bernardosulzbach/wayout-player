@@ -7,7 +7,7 @@ cmake-format -i ../CMakeLists.txt
 clang-format -i ../src/* ../test/*
 
 # Run CMake.
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
 # Specify the configuration you want here.
 cmake --build . --config Release --parallel 8
