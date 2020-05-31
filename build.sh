@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Stops after the first error.
+set -e 
+set -o pipefail
+
 # Run this script from within your build tree.
 
 # Format the source code.
