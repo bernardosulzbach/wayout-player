@@ -6,7 +6,17 @@ namespace WayoutPlayer {
 Color::Color(U8 rChannel, U8 gChannel, U8 bChannel) : r(rChannel), g(gChannel), b(bChannel) {
 }
 
-Color Color::fromHSV(F32 h, F32 s, F32 v) {
+static void assertArgumentInRange(const F32 c, const F32 a, const F32 b) {
+  if (c < a || c > b) {
+    const auto rangeString = "[" + std::to_string(a) + ", " + std::to_string(b) + "]";
+    throw std::runtime_error("Value " + std::to_string(c) + " is outside of expected range " + rangeString + ".");
+  }
+}
+
+Color Color::fromHSV(const F32 h, const F32 s, const F32 v) {
+  assertArgumentInRange(h, 0.0f, 360.0f);
+  assertArgumentInRange(s, 0.0f, 1.0f);
+  assertArgumentInRange(v, 0.0f, 1.0f);
   const auto source = cv::Mat3f(cv::Vec3f(h, s, v));
   auto destination = cv::Mat3f(1, 1);
   cv::cvtColor(source, destination, cv::ColorConversionCodes::COLOR_HSV2RGB);
