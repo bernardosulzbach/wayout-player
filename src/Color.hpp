@@ -2,6 +2,8 @@
 
 #include "Types.hpp"
 
+#include <string>
+
 namespace WayoutPlayer {
 class Color {
   U8 r{};
@@ -9,9 +11,10 @@ class Color {
   U8 b{};
 
 public:
-  Color() = default;
+  constexpr Color() = default;
 
-  Color(U8 rChannel, U8 gChannel, U8 bChannel);
+  constexpr Color(U8 rChannel, U8 gChannel, U8 bChannel) : r(rChannel), g(gChannel), b(bChannel) {
+  }
 
   static Color fromHSV(F32 h, F32 s, F32 v);
 
@@ -24,12 +27,23 @@ public:
   [[nodiscard]] U8 getB() const;
   U8 &getB();
 
+  [[nodiscard]] Color mix(Color other, F64 weight) const noexcept;
+
   /**
-   * Returns the CIELAB (CIE L*a*b*) lightness of this pixel.
+   * Returns the CIELAB (CIE L*a*b*) lightness of this color.
    *
    * This value is guaranteed to be in the [0.0, 100.0] range.
    */
-  [[nodiscard]] F32 getLightness() const;
+  [[nodiscard]] F32 getLightness() const noexcept;
+
+  /**
+   * Returns the HSV saturation of this color.
+   *
+   * This value is guaranteed to be in the [0.0, 1.0] range.
+   */
+  [[nodiscard]] F32 getSaturation() const noexcept;
+
+  [[nodiscard]] std::string toString() const;
 
   bool operator==(const Color &rhs) const;
   bool operator!=(const Color &rhs) const;

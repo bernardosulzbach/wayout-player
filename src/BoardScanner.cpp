@@ -1,10 +1,13 @@
 #include "BoardScanner.hpp"
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <unordered_set>
 #include <utility>
 
+#include "Average.hpp"
+#include "Color.hpp"
 #include "MaskComponentFinder.hpp"
 #include "Numeric.hpp"
 
@@ -13,6 +16,10 @@ static constexpr std::array<U32, 4> ObservedLoweredSideSizes = {873, 872, 870, 8
 static constexpr std::array<U32, 9> ObservedTopSizes = {4709, 4711, 4722, 4720, 4722, 4723, 4842, 4723, 4577};
 
 static constexpr auto RelativeTolerance = 0.05f;
+static_assert(RelativeTolerance > 0.0f);
+static_assert(RelativeTolerance < 1.0f);
+
+static constexpr std::array<Color, 4> LoweredColors = {{{95, 95, 94}, {94, 97, 93}, {97, 99, 96}, {96, 97, 96}}};
 
 template <std::size_t N> static constexpr U32 getScaledMinimumObservedSizes(const std::array<U32, N> &observedSizes) {
   return *std::min_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0f - RelativeTolerance);
@@ -27,6 +34,22 @@ static constexpr auto MaximumExpectedLoweredSideSize = getScaledMaximumObservedS
 
 static constexpr auto MinimumExpectedTopSize = getScaledMinimumObservedSizes(ObservedTopSizes);
 static constexpr auto MaximumExpectedTopSize = getScaledMaximumObservedSizes(ObservedTopSizes);
+
+static F32 getScaledMinimumExpectedLoweredSaturation() {
+  const auto begin = std::begin(LoweredColors);
+  const auto end = std::end(LoweredColors);
+  const auto compareBySaturation = [](const Color &a, const Color &b) { return a.getSaturation() < b.getSaturation(); };
+  const auto maximumObservedSaturation = std::min_element(begin, end, compareBySaturation)->getSaturation();
+  return maximumObservedSaturation * (1.0f - RelativeTolerance);
+}
+
+static F32 getScaledMaximumExpectedLoweredSaturation() {
+  const auto begin = std::begin(LoweredColors);
+  const auto end = std::end(LoweredColors);
+  const auto compareBySaturation = [](const Color &a, const Color &b) { return a.getSaturation() < b.getSaturation(); };
+  const auto maximumObservedSaturation = std::max_element(begin, end, compareBySaturation)->getSaturation();
+  return std::min(1.0f, maximumObservedSaturation * (1.0f + RelativeTolerance));
+}
 
 static constexpr auto EdgesImageFilename = "edges.png";
 
@@ -56,6 +79,9 @@ Board BoardScanner::scan(const Image &image) {
   MaskComponentFinder componentFinder(mask);
   const auto componentCount = componentFinder.getComponentCount();
   if (componentCount > 0) {
+    // Cannot be made constants as getSaturation() is not a constant-expression.
+    const auto MinimumExpectedLoweredSaturation = getScaledMinimumExpectedLoweredSaturation();
+    const auto MaximumExpectedLoweredSaturation = getScaledMaximumExpectedLoweredSaturation();
     std::unordered_set<U32> loweredSideComponents;
     std::unordered_set<U32> componentsOfInterest;
     if (debuggingPath) {
@@ -82,6 +108,7 @@ Board BoardScanner::scan(const Image &image) {
       componentOfInterestColor[component] = Color::fromHSV(hue, 0.8f, 0.8f);
       componentOfInterestIndex++;
     }
+    std::unordered_map<U32, Average<Color>> componentOfInterestAverageColor;
     for (U32 i = 0; i < componentFinder.getHeight(); i++) {
       for (U32 j = 0; j < componentFinder.getWidth(); j++) {
         const auto componentId = componentFinder.getComponentId(i, j);
@@ -89,6 +116,7 @@ Board BoardScanner::scan(const Image &image) {
           continue;
         }
         imageCopy.setPixel(i, j, componentOfInterestColor[componentId]);
+        componentOfInterestAverageColor[componentId].add(image.getPixel(i, j));
       }
     }
     for (const auto componentId : componentsOfInterest) {
@@ -103,8 +131,16 @@ Board BoardScanner::scan(const Image &image) {
         const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
         const auto i = coordinates.getI();
         const auto j = coordinates.getJ();
+        textFile << "Found a component centered at (" << i << ", " << j << ")" << ' ';
         const auto size = componentFinder.getComponentSize(componentId);
-        textFile << "Found a component centered at (" << i << ", " << j << ") with size " << size << "." << '\n';
+        textFile << "with size " << size << ' ';
+        const auto averageColor = componentOfInterestAverageColor[componentId].getAverage();
+        textFile << "and average color " << averageColor.toString() << "." << '\n';
+        textFile << "Based on this, it is considered to be a ";
+        const auto saturation = averageColor.getSaturation();
+        const auto isUp = !inRange(MinimumExpectedLoweredSaturation, saturation, MaximumExpectedLoweredSaturation);
+        const auto tile = Tile(isUp, TileType::Default);
+        textFile << tile.toString() << "." << '\n';
       }
     }
   }

@@ -28,7 +28,7 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
       componentCentroid.emplace_back();
       std::queue<std::pair<U32, U32>> nextPixels;
       componentId[i][j] = componentCount;
-      componentCentroid[componentCount].add(i, j);
+      componentCentroid[componentCount].add(FloatingPointScreenCoordinates(i, j));
       nextPixels.push({i, j});
       while (!nextPixels.empty()) {
         U32 pi;
@@ -44,7 +44,7 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
           std::tie(ni, nj) = neighbor;
           if (!mask.getValue(ni, nj) && componentId[ni][nj] == None) {
             componentId[ni][nj] = componentCount;
-            componentCentroid[componentCount].add(ni, nj);
+            componentCentroid[componentCount].add(FloatingPointScreenCoordinates(ni, nj));
             nextPixels.push({ni, nj});
           }
         }
@@ -79,10 +79,10 @@ MaskComponentFinder::IdType MaskComponentFinder::getComponentCount() const {
 }
 
 MaskComponentFinder::IdType MaskComponentFinder::getComponentSize(IdType component) const {
-  return getComponentCentroid(component).getPointCount();
+  return componentCentroid[component].getSampleCount();
 }
 
-Centroid MaskComponentFinder::getComponentCentroid(IdType component) const {
-  return componentCentroid[component];
+FloatingPointScreenCoordinates MaskComponentFinder::getComponentCentroid(IdType component) const {
+  return componentCentroid[component].getAverage();
 }
 } // namespace WayoutPlayer

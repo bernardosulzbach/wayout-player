@@ -4,7 +4,8 @@
 #include <queue>
 #include <vector>
 
-#include "Centroid.hpp"
+#include "Average.hpp"
+#include "FloatingPointScreenCoordinates.hpp"
 #include "Mask.hpp"
 #include "Types.hpp"
 
@@ -14,7 +15,7 @@ class MaskComponentFinder {
 
   std::vector<std::vector<IdType>> componentId;
   IdType componentCount{};
-  std::vector<Centroid> componentCentroid;
+  std::vector<Average<FloatingPointScreenCoordinates>> componentCentroid;
 
   void findComponents(const Mask &mask);
 
@@ -33,6 +34,6 @@ public:
 
   [[nodiscard]] IdType getComponentSize(IdType component) const;
 
-  [[nodiscard]] Centroid getComponentCentroid(IdType component) const;
+  [[nodiscard]] FloatingPointScreenCoordinates getComponentCentroid(IdType component) const;
 };
 } // namespace WayoutPlayer

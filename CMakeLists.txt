@@ -45,44 +45,45 @@ add_library(
   src/ArgumentFactory.hpp
   src/ArgumentParser.cpp
   src/ArgumentParser.hpp
-  src/SystemInformation.cpp
-  src/SystemInformation.hpp
+  src/Average.hpp
   src/Board.cpp
   src/Board.hpp
   src/BoardScanner.cpp
   src/BoardScanner.hpp
-  src/Image.cpp
-  src/Image.hpp
   src/Color.cpp
   src/Color.hpp
+  src/Filesystem.cpp
+  src/Filesystem.hpp
+  src/FloatingPointScreenCoordinates.cpp
+  src/FloatingPointScreenCoordinates.hpp
+  src/Hashing.cpp
+  src/Hashing.hpp
+  src/Image.cpp
+  src/Image.hpp
+  src/IntegralScreenCoordinates.cpp
+  src/IntegralScreenCoordinates.hpp
   src/Mask.cpp
   src/Mask.hpp
   src/MaskComponentFinder.cpp
   src/MaskComponentFinder.hpp
-  src/Types.hpp
+  src/Numeric.hpp
   src/Position.cpp
   src/Position.hpp
-  src/Tile.cpp
-  src/Tile.hpp
-  src/Text.cpp
-  src/Text.hpp
-  src/Numeric.hpp
+  src/Solution.cpp
+  src/Solution.hpp
   src/Solver.cpp
   src/Solver.hpp
-  src/Centroid.cpp
-  src/Centroid.hpp
-  src/IntegralScreenCoordinates.cpp
-  src/IntegralScreenCoordinates.hpp
   src/SolverConfiguration.cpp
   src/SolverConfiguration.hpp
+  src/SystemInformation.cpp
+  src/SystemInformation.hpp
+  src/Text.cpp
+  src/Text.hpp
+  src/Tile.cpp
+  src/Tile.hpp
   src/TileType.cpp
   src/TileType.hpp
-  src/Filesystem.cpp
-  src/Filesystem.hpp
-  src/Hashing.cpp
-  src/Hashing.hpp
-  src/Solution.cpp
-  src/Solution.hpp)
+  src/Types.hpp)
 
 find_package(Threads REQUIRED)
 
