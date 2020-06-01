@@ -19,7 +19,7 @@ static constexpr auto RelativeTolerance = 0.05f;
 static_assert(RelativeTolerance > 0.0f);
 static_assert(RelativeTolerance < 1.0f);
 
-static constexpr std::array<Color, 4> LoweredColors = {{{95, 95, 94}, {94, 97, 93}, {97, 99, 96}, {96, 97, 96}}};
+static constexpr std::array<Color<U8>, 4> LoweredColors = {{{95, 95, 94}, {94, 97, 93}, {97, 99, 96}, {96, 97, 96}}};
 
 template <std::size_t N> static constexpr U32 getScaledMinimumObservedSizes(const std::array<U32, N> &observedSizes) {
   return *std::min_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0f - RelativeTolerance);
@@ -35,20 +35,22 @@ static constexpr auto MaximumExpectedLoweredSideSize = getScaledMaximumObservedS
 static constexpr auto MinimumExpectedTopSize = getScaledMinimumObservedSizes(ObservedTopSizes);
 static constexpr auto MaximumExpectedTopSize = getScaledMaximumObservedSizes(ObservedTopSizes);
 
-static F32 getScaledMinimumExpectedLoweredSaturation() {
+static std::pair<F32, F32> getMinMaxObservedLoweredSaturation() {
   const auto begin = std::begin(LoweredColors);
   const auto end = std::end(LoweredColors);
-  const auto compareBySaturation = [](const Color &a, const Color &b) { return a.getSaturation() < b.getSaturation(); };
-  const auto maximumObservedSaturation = std::min_element(begin, end, compareBySaturation)->getSaturation();
-  return maximumObservedSaturation * (1.0f - RelativeTolerance);
+  const auto compareBySaturation = [](const Color<U8> &a, const Color<U8> &b) {
+    return a.getSaturation() < b.getSaturation();
+  };
+  const auto minMax = std::minmax_element(begin, end, compareBySaturation);
+  return {minMax.first->getSaturation(), minMax.second->getSaturation()};
+}
+
+static F32 getScaledMinimumExpectedLoweredSaturation() {
+  return getMinMaxObservedLoweredSaturation().first * (1.0f - RelativeTolerance);
 }
 
 static F32 getScaledMaximumExpectedLoweredSaturation() {
-  const auto begin = std::begin(LoweredColors);
-  const auto end = std::end(LoweredColors);
-  const auto compareBySaturation = [](const Color &a, const Color &b) { return a.getSaturation() < b.getSaturation(); };
-  const auto maximumObservedSaturation = std::max_element(begin, end, compareBySaturation)->getSaturation();
-  return std::min(1.0f, maximumObservedSaturation * (1.0f + RelativeTolerance));
+  return std::min(1.0f, getMinMaxObservedLoweredSaturation().second * (1.0f + RelativeTolerance));
 }
 
 static constexpr auto EdgesImageFilename = "edges.png";
@@ -60,16 +62,16 @@ BoardScanner::BoardScanner() = default;
 
 Board BoardScanner::scan(const Image &image) {
   // Find the darkest edges.
-  auto mask = image.findPixels([](const Color color) { return color.getLightness() <= 25.0f; });
+  auto mask = image.findPixels([](const Color<U8> color) { return color.getLightness() <= 25.0f; });
   // Open them by including their lighter neighbors.
   mask.open([&image](const U32 i, const U32 j) { return image.getPixel(i, j).getLightness() <= 32.5f; });
   auto imageCopy = image;
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
       if (mask.getValue(i, j)) {
-        imageCopy.setPixel(i, j, Color(255, 255, 255));
+        imageCopy.setPixel(i, j, Color<U8>(255, 255, 255));
       } else {
-        imageCopy.setPixel(i, j, Color(0, 0, 0));
+        imageCopy.setPixel(i, j, Color<U8>(0, 0, 0));
       }
     }
   }
@@ -101,14 +103,14 @@ Board BoardScanner::scan(const Image &image) {
         componentsOfInterest.insert(component);
       }
     }
-    std::unordered_map<U32, Color> componentOfInterestColor;
+    std::unordered_map<U32, Color<U8>> componentOfInterestColor;
     U32 componentOfInterestIndex = 0;
     for (const auto component : componentsOfInterest) {
       const auto hue = 360.0f * componentOfInterestIndex / componentsOfInterest.size();
-      componentOfInterestColor[component] = Color::fromHSV(hue, 0.8f, 0.8f);
+      componentOfInterestColor[component] = Color<U8>::fromHSV(hue, 0.8f, 0.8f);
       componentOfInterestIndex++;
     }
-    std::unordered_map<U32, Average<Color>> componentOfInterestAverageColor;
+    std::unordered_map<U32, Average<Color<F32>>> componentOfInterestAverageColor;
     for (U32 i = 0; i < componentFinder.getHeight(); i++) {
       for (U32 j = 0; j < componentFinder.getWidth(); j++) {
         const auto componentId = componentFinder.getComponentId(i, j);
@@ -116,7 +118,8 @@ Board BoardScanner::scan(const Image &image) {
           continue;
         }
         imageCopy.setPixel(i, j, componentOfInterestColor[componentId]);
-        componentOfInterestAverageColor[componentId].add(image.getPixel(i, j));
+        const auto color = image.getPixel(i, j);
+        componentOfInterestAverageColor[componentId].add(Color<F32>(color.getR(), color.getG(), color.getB()));
       }
     }
     for (const auto componentId : componentsOfInterest) {

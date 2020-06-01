@@ -4,7 +4,7 @@
 #include <opencv2/imgcodecs.hpp>
 
 namespace WayoutPlayer {
-Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Color>(imageWidth)) {
+Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Color<U8>>(imageWidth)) {
 }
 
 U32 Image::getHeight() const {
@@ -18,15 +18,15 @@ U32 Image::getWidth() const {
   return data.front().size();
 }
 
-Color Image::getPixel(const U32 i, const U32 j) const {
+Color<U8> Image::getPixel(const U32 i, const U32 j) const {
   return data[i][j];
 }
 
-void Image::setPixel(const U32 i, const U32 j, const Color color) {
+void Image::setPixel(const U32 i, const U32 j, const Color<U8> color) {
   data[i][j] = color;
 }
 
-void Image::setCross(const U32 centerI, const U32 centerJ, const U32 diameter, const Color color) {
+void Image::setCross(const U32 centerI, const U32 centerJ, const U32 diameter, const Color<U8> color) {
   if (diameter == 0) {
     throw std::invalid_argument("Diameter must be nonzero.");
   }
@@ -48,7 +48,7 @@ void Image::setCross(const U32 centerI, const U32 centerJ, const U32 diameter, c
   }
 }
 
-Mask Image::findPixels(const std::function<bool(Color)> &predicate) const {
+Mask Image::findPixels(const std::function<bool(Color<U8>)> &predicate) const {
   Mask mask(getHeight(), getWidth());
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
