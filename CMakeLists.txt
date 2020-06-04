@@ -50,7 +50,6 @@ add_library(
   src/Board.hpp
   src/BoardScanner.cpp
   src/BoardScanner.hpp
-  src/Color.cpp
   src/Color.hpp
   src/Filesystem.cpp
   src/Filesystem.hpp
