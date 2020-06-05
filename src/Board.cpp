@@ -9,6 +9,9 @@ S32 Board::getRowCount() const {
 }
 
 S32 Board::getColumnCount() const {
+  if (getRowCount() == 0) {
+    return 0;
+  }
   return static_cast<S32>(matrix.front().size());
 }
 

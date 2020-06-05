@@ -15,6 +15,23 @@ void informAboutException(const std::exception &exception) {
   std::cout << "  " << exception.what() << '\n';
 }
 
+Board boardFromInputPath(const ArgumentParser &argumentParser) {
+  const auto inputPath = argumentParser.getArgument(ArgumentFactory::makeInputArgument()).at(0);
+  if (inputPath.ends_with(".txt")) {
+    const auto boardString = readFile(inputPath);
+    return Board::fromString(boardString);
+  } else if (inputPath.ends_with(".png")) {
+    const auto image = readImageFromFile(inputPath);
+    BoardScanner boardScanner;
+    if (argumentParser.hasArgument(ArgumentFactory::makeDebuggingPathArgument())) {
+      const auto debuggingPath = argumentParser.getArgument(ArgumentFactory::makeDebuggingPathArgument()).at(0);
+      boardScanner.setDebuggingPath(debuggingPath);
+    }
+    return boardScanner.scan(image);
+  }
+  throw std::runtime_error("Could not figure out the file type from the extension.");
+}
+
 int main(int argc, char **argv) {
   try {
     std::vector<std::string> commandLineArguments(argc - 1);
@@ -29,27 +46,14 @@ int main(int argc, char **argv) {
       }
       return 0;
     }
-    const auto inputPath = argumentParser.getArgument(ArgumentFactory::makeInputArgument()).at(0);
-    if (inputPath.ends_with(".txt")) {
-      const auto boardString = readFile(inputPath);
-      const auto board = Board::fromString(boardString);
-      std::cout << board.toString() << '\n';
-      auto solver = Solver();
-      solver.getSolverConfiguration().setVerbose(true);
-      const auto solution = solver.findSolution(board);
-      std::cout << solution.toString() << '\n';
-      std::cout << solution.getStatisticsString() << '\n';
-    } else if (inputPath.ends_with(".png")) {
-      const auto image = readImageFromFile(inputPath);
-      BoardScanner boardScanner;
-      if (argumentParser.hasArgument(ArgumentFactory::makeDebuggingPathArgument())) {
-        const auto debuggingPath = argumentParser.getArgument(ArgumentFactory::makeDebuggingPathArgument()).at(0);
-        boardScanner.setDebuggingPath(debuggingPath);
-      }
-      boardScanner.scan(image);
-    } else {
-      std::cout << "Could not figure out the file type from the extension." << '\n';
-    }
+    const auto board = boardFromInputPath(argumentParser);
+    std::cout << "Solving the following board." << '\n';
+    std::cout << board.toString() << '\n';
+    auto solver = Solver();
+    solver.getSolverConfiguration().setVerbose(true);
+    const auto solution = solver.findSolution(board);
+    std::cout << solution.toString() << '\n';
+    std::cout << solution.getStatisticsString() << '\n';
   } catch (const std::exception &exception) {
     informAboutException(exception);
   }

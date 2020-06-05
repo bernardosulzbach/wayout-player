@@ -7,6 +7,7 @@
 #include <string>
 
 namespace WayoutPlayer {
+static constexpr auto HsvEpsilon = 1e-6;
 /**
  * A color represented as three channels (RGB) in the range [0, 255].
  */
@@ -25,9 +26,9 @@ public:
   }
 
   static Color<DataType> fromHSV(const F32 h, const F32 s, const F32 v) {
-    assertInRange<F32>(0.0f, h, 360.0f);
-    assertInRange<F32>(0.0f, s, 1.0f);
-    assertInRange<F32>(0.0f, v, 1.0f);
+    assertInRange<F32>(0.0f - HsvEpsilon, h, 360.0f + HsvEpsilon);
+    assertInRange<F32>(0.0f - HsvEpsilon, s, 1.0f + HsvEpsilon);
+    assertInRange<F32>(0.0f - HsvEpsilon, v, 1.0f + HsvEpsilon);
     const auto source = cv::Mat3f(cv::Vec3f(h, s, v));
     auto destination = cv::Mat3f(1, 1);
     cv::cvtColor(source, destination, cv::ColorConversionCodes::COLOR_HSV2RGB);

@@ -9,6 +9,7 @@
 #include "../src/BoardScanner.hpp"
 #include "../src/Hashing.hpp"
 #include "../src/Image.hpp"
+#include "../src/Range.hpp"
 #include "../src/Solver.hpp"
 #include "../src/TileType.hpp"
 
@@ -311,4 +312,28 @@ BOOST_AUTO_TEST_CASE(shouldCorrectlyEvaluateLightness) {
   BOOST_CHECK_CLOSE(Color<U8>(63, 127, 191).getLightness(), 51.83, threshold);
   BOOST_CHECK_CLOSE(Color<U8>(127, 127, 127).getLightness(), 53.19, threshold);
   BOOST_CHECK_CLOSE(Color<U8>(255, 255, 255).getLightness(), 100.0, threshold);
+}
+
+BOOST_AUTO_TEST_CASE(shouldCorrectlyUpdateRanges) {
+  auto range = Range<S32>{};
+  BOOST_CHECK_EQUAL(range.getLow(), 0);
+  BOOST_CHECK_EQUAL(range.getHigh(), 0);
+  range = range.include(1);
+  BOOST_CHECK_EQUAL(range.getLow(), 0);
+  BOOST_CHECK_EQUAL(range.getHigh(), 1);
+  range = range.include(-1);
+  BOOST_CHECK_EQUAL(range.getLow(), -1);
+  BOOST_CHECK_EQUAL(range.getHigh(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(shouldNotMutateRanges) {
+  auto range = Range<S32>{};
+  BOOST_CHECK_EQUAL(range.getLow(), 0);
+  BOOST_CHECK_EQUAL(range.getHigh(), 0);
+  const auto ignoredA = range.include(1);
+  BOOST_CHECK_EQUAL(range.getLow(), 0);
+  BOOST_CHECK_EQUAL(range.getHigh(), 0);
+  const auto ignoredB = range.include(-1);
+  BOOST_CHECK_EQUAL(range.getLow(), 0);
+  BOOST_CHECK_EQUAL(range.getHigh(), 0);
 }

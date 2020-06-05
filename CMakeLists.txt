@@ -80,6 +80,7 @@ add_library(
   src/Text.hpp
   src/Tile.cpp
   src/Tile.hpp
+  src/Range.hpp
   src/TileType.cpp
   src/TileType.hpp
   src/Types.hpp)
