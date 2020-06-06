@@ -330,10 +330,10 @@ BOOST_AUTO_TEST_CASE(shouldNotMutateRanges) {
   auto range = Range<S32>{};
   BOOST_CHECK_EQUAL(range.getLow(), 0);
   BOOST_CHECK_EQUAL(range.getHigh(), 0);
-  const auto ignoredA = range.include(1);
+  static_cast<void>(range.include(1));
   BOOST_CHECK_EQUAL(range.getLow(), 0);
   BOOST_CHECK_EQUAL(range.getHigh(), 0);
-  const auto ignoredB = range.include(-1);
+  static_cast<void>(range.include(-1));
   BOOST_CHECK_EQUAL(range.getLow(), 0);
   BOOST_CHECK_EQUAL(range.getHigh(), 0);
 }
