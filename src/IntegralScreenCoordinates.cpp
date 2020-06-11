@@ -11,4 +11,12 @@ U32 IntegralScreenCoordinates::getI() const {
 U32 IntegralScreenCoordinates::getJ() const {
   return j;
 }
+
+bool IntegralScreenCoordinates::operator==(const IntegralScreenCoordinates &rhs) const {
+  return i == rhs.i && j == rhs.j;
+}
+
+bool IntegralScreenCoordinates::operator!=(const IntegralScreenCoordinates &rhs) const {
+  return !(rhs == *this);
+}
 } // namespace WayoutPlayer

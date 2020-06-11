@@ -14,6 +14,14 @@ template <typename T> inline constexpr bool inRange(const T low, const T value, 
   return low <= value && value <= high;
 }
 
+/**
+ * Computes the absolute difference between two unsigned values.
+ */
+template <typename T> inline constexpr T absoluteDifference(const T a, const T b) noexcept {
+  static_assert(std::is_unsigned<T>::value);
+  return std::max(a, b) - std::min(a, b);
+}
+
 template <typename T> inline void assertInRange(const T low, const T value, const T high) {
   if (!inRange(low, value, high)) {
     const auto valueString = std::to_string(value);

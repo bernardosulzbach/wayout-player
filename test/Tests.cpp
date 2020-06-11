@@ -9,6 +9,8 @@
 #include "../src/BoardScanner.hpp"
 #include "../src/Hashing.hpp"
 #include "../src/Image.hpp"
+#include "../src/Mask.hpp"
+#include "../src/MaskComponentFinder.hpp"
 #include "../src/Range.hpp"
 #include "../src/Solver.hpp"
 #include "../src/TileType.hpp"
@@ -336,4 +338,30 @@ BOOST_AUTO_TEST_CASE(shouldNotMutateRanges) {
   static_cast<void>(range.include(-1));
   BOOST_CHECK_EQUAL(range.getLow(), 0);
   BOOST_CHECK_EQUAL(range.getHigh(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(shouldProperlyDissolveComponents) {
+  constexpr U32 Side = 7;
+  static_assert(Side % 2 == 1);
+  Mask mask(Side, Side);
+  for (U32 i = 0; i < Side; i++) {
+    for (U32 j = 0; j < Side; j++) {
+      const auto di = absoluteDifference(i, Side / 2u);
+      const auto dj = absoluteDifference(j, Side / 2u);
+      const auto squareSide = std::max(di, dj) + 1u;
+      mask.setValue(i, j, squareSide % 2 == 0);
+    }
+  }
+  MaskComponentFinder maskComponentFinder(mask);
+  const auto oldBorderId = maskComponentFinder.getComponentId(1u, 1u);
+  const auto oldCenterId = maskComponentFinder.getComponentId(Side / 2u, Side / 2u);
+  BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldBorderId), 5 * 5 - 3 * 3);
+  BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldCenterId), 1);
+  BOOST_CHECK_NO_THROW(maskComponentFinder.dissolveComponent(oldCenterId));
+  unsigned int newCenterId = maskComponentFinder.getComponentId(Side / 2u, Side / 2u);
+  BOOST_CHECK_NE(newCenterId, oldCenterId);
+  BOOST_CHECK_EQUAL(newCenterId, oldBorderId);
+  BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldBorderId), 5 * 5);
+  BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldCenterId), 0);
+  BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(newCenterId), 5 * 5);
 }

@@ -59,6 +59,8 @@ add_library(
   src/Hashing.hpp
   src/Image.cpp
   src/Image.hpp
+  src/ImageComponentType.cpp
+  src/ImageComponentType.hpp
   src/IntegralScreenCoordinates.cpp
   src/IntegralScreenCoordinates.hpp
   src/Mask.cpp
