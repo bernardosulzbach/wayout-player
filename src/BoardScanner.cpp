@@ -226,9 +226,13 @@ Board BoardScanner::scan(const Image &image) {
        * On Maxima, algsys([48 * a - 48 * b = di, 78 * a + 78 * b = dj], [a, b]) gives
        */
       // TODO: investigate why this threshold has to be so large.
-      const auto a = static_cast<IndexType>(roundWithin((8 * dj + 13 * di) / 1248.0, 0.02));
-      const auto b = static_cast<IndexType>(roundWithin((8 * dj - 13 * di) / 1248.0, 0.02));
-      // std::cout << "Found component at " << static_cast<S32>(a) << ", " << static_cast<S32>(b) << "." << '\n';
+      const auto aFloating = (8 * dj + 13 * di) / 1248.0;
+      const auto a = static_cast<IndexType>(roundWithin(aFloating, 0.02));
+      const auto bFloating = (8 * dj - 13 * di) / 1248.0;
+      const auto b = static_cast<IndexType>(roundWithin(bFloating, 0.02));
+      std::cout << "Found component at (" << aFloating << ", " << bFloating << ")" << ' ';
+      std::cout << "[" << static_cast<S32>(a) << ", " << static_cast<S32>(b) << "]" << '.';
+      std::cout << '\n';
       componentPositions[componentId] = {a, b};
     }
   }
