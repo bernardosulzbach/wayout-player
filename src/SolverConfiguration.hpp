@@ -4,8 +4,8 @@
 
 namespace WayoutPlayer {
 class SolverConfiguration {
-  std::size_t maximumBoardHashTableSize = 1u << 30u;
-  std::size_t maximumStateQueueSize = 1u << 30u;
+  std::size_t maximumBoardHashTableSize = 1U << 30U;
+  std::size_t maximumStateQueueSize = 1U << 30U;
 
   bool flipOnlyUp = false;
   bool verbose = false;

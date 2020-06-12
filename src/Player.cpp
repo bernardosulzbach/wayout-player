@@ -7,6 +7,7 @@
 #include "SystemInformation.hpp"
 
 #include <iostream>
+#include <span>
 
 using namespace WayoutPlayer;
 
@@ -36,8 +37,9 @@ Board boardFromInputPath(const ArgumentParser &argumentParser) {
 int main(int argc, char **argv) {
   try {
     std::vector<std::string> commandLineArguments(argc - 1);
+    std::span<char *, std::dynamic_extent> argumentSpan(argv, argc);
     for (int i = 1; i < argc; i++) {
-      commandLineArguments[i - 1] = argv[i];
+      commandLineArguments[i - 1] = argumentSpan[i];
     }
     ArgumentParser argumentParser(commandLineArguments);
     if (argumentParser.hasArgument(ArgumentFactory::makeHelpArgument())) {

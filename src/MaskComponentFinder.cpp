@@ -78,8 +78,8 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
   }
 }
 
-MaskComponentFinder::MaskComponentFinder(const Mask &initialMask)
-    : mask(initialMask), componentId(mask.getHeight(), std::vector<ComponentId>(mask.getWidth(), None)) {
+MaskComponentFinder::MaskComponentFinder(const Mask &mask)
+    : componentId(mask.getHeight(), std::vector<ComponentId>(mask.getWidth(), None)) {
   findComponents(mask);
 }
 
@@ -117,8 +117,8 @@ FloatingPointScreenCoordinates MaskComponentFinder::getComponentCentroid(Compone
 using IntegralScreenCoordinatesSet = MaskComponentFinder::IntegralScreenCoordinatesSet;
 IntegralScreenCoordinatesSet MaskComponentFinder::getEdgeAroundComponent(const ComponentId id) const {
   IntegralScreenCoordinatesSet set;
-  for (U32 i = 0; i < mask.getHeight(); i++) {
-    for (U32 j = 0; j < mask.getWidth(); j++) {
+  for (U32 i = 0; i < getHeight(); i++) {
+    for (U32 j = 0; j < getWidth(); j++) {
       if (componentId[i][j] == id) {
         for (const auto neighbor : getNeighbors(IntegralScreenCoordinates(i, j))) {
           if (getComponentId(neighbor) == None && !set.contains(neighbor)) {
@@ -159,13 +159,13 @@ void MaskComponentFinder::dissolveComponent(const ComponentId id) {
   if (touchingEdge.size() != 2) {
     throw std::runtime_error("Expected exactly two components to be touching the edge.");
   }
-  touchingEdge.erase(std::remove(std::begin(touchingEdge), std::end(touchingEdge), id));
+  touchingEdge.erase(std::remove(std::begin(touchingEdge), std::end(touchingEdge), id), std::end(touchingEdge));
   if (touchingEdge.size() != 1) {
     throw std::runtime_error("Expected one component from the touching set to be the dissolved component.");
   }
   const auto acquiringComponent = touchingEdge[0];
-  for (U32 i = 0; i < mask.getHeight(); i++) {
-    for (U32 j = 0; j < mask.getWidth(); j++) {
+  for (U32 i = 0; i < getHeight(); i++) {
+    for (U32 j = 0; j < getWidth(); j++) {
       if (componentId[i][j] == id) {
         componentId[i][j] = acquiringComponent;
         componentCentroid[acquiringComponent].add(FloatingPointScreenCoordinates(i, j));

@@ -19,7 +19,6 @@ public:
   static constexpr auto None = std::numeric_limits<ComponentId>::max();
 
 private:
-  Mask mask;
   std::vector<std::vector<ComponentId>> componentId;
   ComponentId componentCount{};
   std::vector<Average<FloatingPointScreenCoordinates>> componentCentroid;

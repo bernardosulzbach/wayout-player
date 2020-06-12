@@ -37,6 +37,8 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 find_package(OpenCV REQUIRED core imgcodecs imgproc)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+include_directories("include")
+
 add_library(
   wayout-player OBJECT
   src/Argument.cpp

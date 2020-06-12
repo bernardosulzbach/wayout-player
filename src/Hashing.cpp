@@ -6,6 +6,8 @@
 
 #include <openssl/evp.h>
 
+#include <gsl/gsl>
+
 namespace WayoutPlayer {
 static constexpr auto BitsInByte = 8U;
 
@@ -25,7 +27,7 @@ U64 hashString(const std::string &string) {
   EVP_MD_CTX_free(messageDigestContext);
   U64 truncatedDigest = 0;
   for (unsigned int i = 0; i < sizeof(U64); i++) {
-    truncatedDigest = (truncatedDigest << BitsInByte) | messageDigestValue[i];
+    truncatedDigest = (truncatedDigest << BitsInByte) | gsl::at(messageDigestValue, i);
   }
   return truncatedDigest;
 }

@@ -7,6 +7,8 @@
 #include "Types.hpp"
 
 namespace WayoutPlayer {
+inline constexpr auto MaximumRoundingThreshold = 0.5;
+
 /**
  * Tests if value is in the range [low, high].
  */
@@ -39,7 +41,7 @@ template <typename T> inline void assertInRange(const T low, const T value, cons
  */
 template <typename T> inline constexpr T roundWithin(const T value, const T threshold) {
   static_assert(std::is_same<T, F32>::value || std::is_same<T, F64>::value);
-  assertInRange(0.0, threshold, 0.5);
+  assertInRange(0.0, threshold, MaximumRoundingThreshold);
   const auto rounded = std::round(value);
   const auto distanceToInteger = std::abs(value - rounded);
   if (distanceToInteger > threshold) {
