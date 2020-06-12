@@ -44,9 +44,8 @@ public:
   [[nodiscard]] Color<DataType> getHighContrastGrey() const {
     if (getLightness() >= 50.0) {
       return Color<DataType>(31, 31, 31);
-    } else {
-      return Color<DataType>(224, 224, 224);
     }
+    return Color<DataType>(224, 224, 224);
   }
 
   [[nodiscard]] DataType getR() const noexcept {

@@ -10,7 +10,7 @@ class BoardScanner {
 public:
   BoardScanner();
 
-  Board scan(const Image &color);
+  Board scan(const Image &image);
 
   void setDebuggingPath(std::optional<std::filesystem::path> newDebuggingPath);
 };

@@ -48,49 +48,49 @@ BOOST_AUTO_TEST_CASE(boardIsSolvedWorksOnUnsolvedBoards) {
 }
 
 BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithDefaultTiles) {
-  const auto connectedBoardString = "D0 D0\n"
-                                    "   D0";
+  const auto *const connectedBoardString = "D0 D0\n"
+                                           "   D0";
   BOOST_CHECK(Board::fromString(connectedBoardString).splitComponents().size() == 1);
-  const auto disconnectedBoardString = "D0   \n"
-                                       "   D0";
+  const auto *const disconnectedBoardString = "D0   \n"
+                                              "   D0";
   BOOST_CHECK(Board::fromString(disconnectedBoardString).splitComponents().size() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithTwins) {
-  const auto boardString = "P0   \n"
-                           "   P0";
+  const auto *const boardString = "P0   \n"
+                                  "   P0";
   BOOST_CHECK(Board::fromString(boardString).splitComponents().size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
-  const auto boardString = "D0 V1 D0\n"
-                           "D1 D1 D1\n"
-                           "D0 D1 D0\n"
-                           "T1 H1 T1";
+  const auto *const boardString = "D0 V1 D0\n"
+                                  "D1 D1 D1\n"
+                                  "D0 D1 D0\n"
+                                  "T1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTestWithGaps) {
-  const auto boardString = "D0    D0\n"
-                           "D1 D1 D1\n"
-                           "   D1   \n"
-                           "T1 H1 T1";
+  const auto *const boardString = "D0    D0\n"
+                                  "D1 D1 D1\n"
+                                  "   D1   \n"
+                                  "T1 H1 T1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.toString() == boardString);
 }
 
 BOOST_AUTO_TEST_CASE(activatingAChainTest) {
-  const auto boardString = "C1 D0";
+  const auto *const boardString = "C1 D0";
   auto board = Board::fromString(boardString);
   board.activate(0, 0);
   BOOST_CHECK(board.toString() == "C0 D1");
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTest) {
-  const auto boardString = "D0 D1 D0\n"
-                           "D1 D1 D1\n"
-                           "D0 D1 D0";
+  const auto *const boardString = "D0 D1 D0\n"
+                                  "D1 D1 D1\n"
+                                  "D0 D1 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   const auto expectedSolution = Solution({Position{1, 1}}, true);
@@ -98,9 +98,9 @@ BOOST_AUTO_TEST_CASE(boardSolutionTest) {
 }
 
 BOOST_AUTO_TEST_CASE(boardSolutionTestWithTaps) {
-  const auto boardString = "D0 D1 D0\n"
-                           "D1 T1 D1\n"
-                           "D0 D1 D0";
+  const auto *const boardString = "D0 D1 D0\n"
+                                  "D1 T1 D1\n"
+                                  "D0 D1 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   const auto expectedSolution = Solution({Position{1, 1}}, true);
@@ -108,82 +108,82 @@ BOOST_AUTO_TEST_CASE(boardSolutionTestWithTaps) {
 }
 
 BOOST_AUTO_TEST_CASE(boardsShouldBeDifferentIfTheirTilesAreNotBlocked) {
-  const auto boardAString = "B1";
-  const auto boardBString = "D1";
+  const auto *const boardAString = "B1";
+  const auto *const boardBString = "D1";
   const auto boardA = Board::fromString(boardAString);
   const auto boardB = Board::fromString(boardBString);
   BOOST_CHECK(boardA != boardB);
 }
 
 BOOST_AUTO_TEST_CASE(largeDefaultBoardShouldBeSolved) {
-  const auto boardString = "D1 D0 D1 D0 D1\n"
-                           "D0 D1 D1 D0 D0\n"
-                           "D1 D0 D1 D1 D1\n"
-                           "D1 D0 D0 D0 D1\n"
-                           "D0 D1 D0 D0 D0";
+  const auto *const boardString = "D1 D0 D1 D0 D1\n"
+                                  "D0 D1 D1 D0 D0\n"
+                                  "D1 D0 D1 D1 D1\n"
+                                  "D1 D0 D0 D0 D1\n"
+                                  "D0 D1 D0 D0 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   BOOST_CHECK(boardSolution.getClicks().size() == 8);
 }
 
 BOOST_AUTO_TEST_CASE(boardWithTwinsShouldBeSolved) {
-  const auto boardString = "D0 D1 D0 D0 D0\n"
-                           "D0 P1 D1 D0 D0\n"
-                           "D0 D0 D0 D1 D0\n"
-                           "D1 D1 D0 D1 P0\n"
-                           "P0 D0 D1 D0 D0";
+  const auto *const boardString = "D0 D1 D0 D0 D0\n"
+                                  "D0 P1 D1 D0 D0\n"
+                                  "D0 D0 D0 D1 D0\n"
+                                  "D1 D1 D0 D1 P0\n"
+                                  "P0 D0 D1 D0 D0";
   const auto solver = Solver();
   const auto boardSolution = solver.findSolution(Board::fromString(boardString));
   BOOST_CHECK(boardSolution.getClicks().size() == 6);
 }
 
 BOOST_AUTO_TEST_CASE(activatingDownNeighborTwinsShouldBehaveAsInTheGame) {
-  const auto boardString = "D0 D0         \n"
-                           "P1    D0 D1 D0\n"
-                           "D0    P1 P0 P1\n"
-                           "P1    D0 D1 D0\n"
-                           "D1 D0         ";
+  const auto *const boardString = "D0 D0         \n"
+                                  "P1    D0 D1 D0\n"
+                                  "D0    P1 P0 P1\n"
+                                  "P1    D0 D1 D0\n"
+                                  "D1 D0         ";
   auto board = Board::fromString(boardString);
   board.activate(2, 3);
-  const auto expectedFinalBoardString = "D0 D0         \n"
-                                        "P1    D0 D0 D0\n"
-                                        "D0    P1 P1 P1\n"
-                                        "P1    D0 D0 D0\n"
-                                        "D1 D0         ";
+  const auto *const expectedFinalBoardString = "D0 D0         \n"
+                                               "P1    D0 D0 D0\n"
+                                               "D0    P1 P1 P1\n"
+                                               "P1    D0 D0 D0\n"
+                                               "D1 D0         ";
   BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
 }
 
 BOOST_AUTO_TEST_CASE(activatingUpNeighborTwinsShouldBehaveAsInTheGame) {
-  const auto boardString = "D0 D0         \n"
-                           "P1    D0 D1 D0\n"
-                           "D0    P1 P0 P1\n"
-                           "P1    D0 D1 D0\n"
-                           "D1 D0         ";
+  const auto *const boardString = "D0 D0         \n"
+                                  "P1    D0 D1 D0\n"
+                                  "D0    P1 P0 P1\n"
+                                  "P1    D0 D1 D0\n"
+                                  "D1 D0         ";
   auto board = Board::fromString(boardString);
   board.activate(3, 0);
-  const auto expectedFinalBoardString = "D0 D0         \n"
-                                        "P0    D0 D1 D0\n"
-                                        "D1    P0 P0 P0\n"
-                                        "P0    D0 D1 D0\n"
-                                        "D0 D0         ";
+  const auto *const expectedFinalBoardString = "D0 D0         \n"
+                                               "P0    D0 D1 D0\n"
+                                               "D1    P0 P0 P0\n"
+                                               "P0    D0 D1 D0\n"
+                                               "D0 D0         ";
   BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
 }
 
 BOOST_AUTO_TEST_CASE(solvingABoardWithNeighboringTwinsShouldBehaveAsInTheGame) {
-  const auto boardString = "D0 D0         \n"
-                           "P1    D0 D1 D0\n"
-                           "D0    P1 P0 P1\n"
-                           "P1    D0 D1 D0\n"
-                           "D1 D0         ";
+  const auto *const boardString = "D0 D0         \n"
+                                  "P1    D0 D1 D0\n"
+                                  "D0    P1 P0 P1\n"
+                                  "P1    D0 D1 D0\n"
+                                  "D1 D0         ";
   auto board = Board::fromString(boardString);
   board.activate(3, 0);
   board.activate(2, 3);
   board.activate(2, 0);
-  const auto expectedFinalBoardString = "D0 D0         \n"
-                                        "P0    D0 D0 D0\n"
-                                        "D0    P0 P0 P0\n"
-                                        "P0    D0 D0 D0\n"
-                                        "D0 D0         ";
+  const auto *const expectedFinalBoardString = "D0 D0         \n"
+                                               "P0    D0 D0 D0\n"
+                                               "D0    P0 P0 P0\n"
+                                               "P0    D0 D0 D0\n"
+                                               "D0 D0         ";
   BOOST_CHECK(board == Board::fromString(expectedFinalBoardString));
 }
 
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(positionsShouldBecomeSensibleStrings) {
 }
 
 BOOST_AUTO_TEST_CASE(splittingComponentsShouldJudgeTheNeedForMultipleClicks) {
-  const auto boardString = "D0    B1 D0\n"
-                           "D1    D0 B1";
+  const auto *const boardString = "D0    B1 D0\n"
+                                  "D1    D0 B1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.splitComponents().size() == 2);
   auto requiringMultipleClicks = 0;
@@ -212,15 +212,15 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldJudgeTheNeedForMultipleClicks) {
 }
 
 BOOST_AUTO_TEST_CASE(shouldUnderstandThatABlockedTilesMayNeedMultipleClicks) {
-  const auto boardString = "B1 D0\n"
-                           "D0 B1";
+  const auto *const boardString = "B1 D0\n"
+                                  "D0 B1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(board.mayNeedMultipleClicks());
 }
 
 BOOST_AUTO_TEST_CASE(boardWithBlockedTilesShouldBehaveAsInTheGame) {
-  const auto boardString = "B1 D0\n"
-                           "D0 B1";
+  const auto *const boardString = "B1 D0\n"
+                                  "D0 B1";
   auto board = Board::fromString(boardString);
   board.activate(0, 1);
   BOOST_CHECK(board.toString() == "D1 D1\nD0 D1");
@@ -229,23 +229,23 @@ BOOST_AUTO_TEST_CASE(boardWithBlockedTilesShouldBehaveAsInTheGame) {
 }
 
 BOOST_AUTO_TEST_CASE(shouldSolveSmallBoardWithBlockedTiles) {
-  const auto boardString = "B1 D0\n"
-                           "D0 B1";
+  const auto *const boardString = "B1 D0\n"
+                                  "D0 B1";
   const auto board = Board::fromString(boardString);
   BOOST_CHECK(Solver().findSolution(board).getClicks().size() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(shouldFindComponentsInASmallBoardWithBlockedTiles) {
-  const auto boardString = "B1 D0\n"
-                           "D0 B1";
+  const auto *const boardString = "B1 D0\n"
+                                  "D0 B1";
   const auto board = Board::fromString(boardString);
   const auto components = board.splitComponents();
   BOOST_CHECK(components.size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(splittingComponentsShouldWork) {
-  const auto boardString = "D0   \n"
-                           "   D1";
+  const auto *const boardString = "D0   \n"
+                                  "   D1";
   const auto board = Board::fromString(boardString);
   const auto components = board.splitComponents();
   BOOST_CHECK(components.size() == 2);
@@ -255,11 +255,11 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldWork) {
 }
 
 BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
-  const auto boardString = "D0 D0         \n"
-                           "P1    D0 D1 D0\n"
-                           "D0    P1 P0 P1\n"
-                           "P1    D0 D1 D0\n"
-                           "D1 D0         ";
+  const auto *const boardString = "D0 D0         \n"
+                                  "P1    D0 D1 D0\n"
+                                  "D0    P1 P0 P1\n"
+                                  "P1    D0 D1 D0\n"
+                                  "D1 D0         ";
   const auto board = Board::fromString(boardString);
   const auto components = board.splitComponents();
   BOOST_CHECK(components.size() == 1);
@@ -346,19 +346,19 @@ BOOST_AUTO_TEST_CASE(shouldProperlyDissolveComponents) {
   Mask mask(Side, Side);
   for (U32 i = 0; i < Side; i++) {
     for (U32 j = 0; j < Side; j++) {
-      const auto di = absoluteDifference(i, Side / 2u);
-      const auto dj = absoluteDifference(j, Side / 2u);
-      const auto squareSide = std::max(di, dj) + 1u;
+      const auto di = absoluteDifference(i, Side / 2U);
+      const auto dj = absoluteDifference(j, Side / 2U);
+      const auto squareSide = std::max(di, dj) + 1U;
       mask.setValue(i, j, squareSide % 2 == 0);
     }
   }
   MaskComponentFinder maskComponentFinder(mask);
-  const auto oldBorderId = maskComponentFinder.getComponentId(1u, 1u);
-  const auto oldCenterId = maskComponentFinder.getComponentId(Side / 2u, Side / 2u);
+  const auto oldBorderId = maskComponentFinder.getComponentId(1U, 1U);
+  const auto oldCenterId = maskComponentFinder.getComponentId(Side / 2U, Side / 2U);
   BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldBorderId), 5 * 5 - 3 * 3);
   BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldCenterId), 1);
   BOOST_CHECK_NO_THROW(maskComponentFinder.dissolveComponent(oldCenterId));
-  unsigned int newCenterId = maskComponentFinder.getComponentId(Side / 2u, Side / 2u);
+  unsigned int newCenterId = maskComponentFinder.getComponentId(Side / 2U, Side / 2U);
   BOOST_CHECK_NE(newCenterId, oldCenterId);
   BOOST_CHECK_EQUAL(newCenterId, oldBorderId);
   BOOST_CHECK_EQUAL(maskComponentFinder.getComponentSize(oldBorderId), 5 * 5);

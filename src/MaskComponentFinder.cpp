@@ -56,8 +56,8 @@ void MaskComponentFinder::findComponents(const Mask &mask) {
       componentCentroid[componentCount].add(FloatingPointScreenCoordinates(i, j));
       nextPixels.push({i, j});
       while (!nextPixels.empty()) {
-        U32 pi;
-        U32 pj;
+        U32 pi = 0;
+        U32 pj = 0;
         std::tie(pi, pj) = nextPixels.front();
         nextPixels.pop();
         if (componentId[pi][pj] != componentCount) {

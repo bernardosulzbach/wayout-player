@@ -42,8 +42,8 @@ void Mask::open(const std::function<bool(U32, U32)> &predicate) {
   std::queue<std::pair<U32, U32>> next;
   const auto testAndAddNeighbors = [this, &predicate, &getNeighbors, &next](U32 i, U32 j) {
     for (const auto &neighbor : getNeighbors(i, j)) {
-      U32 ni;
-      U32 nj;
+      U32 ni = 0;
+      U32 nj = 0;
       std::tie(ni, nj) = neighbor;
       if (!getValue(ni, nj) && predicate(ni, nj)) {
         setValue(ni, nj, true);
@@ -59,8 +59,8 @@ void Mask::open(const std::function<bool(U32, U32)> &predicate) {
     }
   }
   while (!next.empty()) {
-    U32 i;
-    U32 j;
+    U32 i = 0;
+    U32 j = 0;
     std::tie(i, j) = next.front();
     next.pop();
     testAndAddNeighbors(i, j);

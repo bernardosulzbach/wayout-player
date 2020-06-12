@@ -20,7 +20,7 @@ U32 Argument::getArity() const {
 }
 
 std::string Argument::toHelpString() const {
-  const auto indentationString = "  ";
+  const auto *const indentationString = "  ";
   std::string helpString;
   helpString += indentationString;
   helpString += getName();

@@ -11,7 +11,7 @@ class ArgumentParser {
   std::unordered_map<Argument, std::vector<std::string>> arguments;
 
 public:
-  ArgumentParser(const std::vector<std::string> &commandLineArguments);
+  explicit ArgumentParser(const std::vector<std::string> &commandLineArguments);
 
   [[nodiscard]] bool hasArgument(const Argument &argument) const;
 

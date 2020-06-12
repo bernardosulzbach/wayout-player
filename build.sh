@@ -13,6 +13,11 @@ clang-format -i ../src/* ../test/*
 # Run CMake.
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
+# Run clang-tidy.
+clang-tidy ../src/* --fix
+# Re-run clang-format after the fixes.
+clang-format -i ../src/* ../test/*
+
 # Specify the configuration you want here.
 cmake --build . --config Release --parallel 8
 

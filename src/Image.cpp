@@ -82,7 +82,7 @@ void Image::writeImageToFile(const std::filesystem::path &path) const {
 
 Image readImageFromFile(const std::filesystem::path &path) {
   cv::Mat cvImage = cv::imread(path, cv::ImreadModes::IMREAD_COLOR);
-  if (!cvImage.data) {
+  if (cvImage.data == nullptr) {
     throw std::runtime_error("Could not open or find the image " + std::string(path.c_str()) + ".");
   }
   if (cvImage.type() != cv::traits::Type<cv::Vec3b>::value) {

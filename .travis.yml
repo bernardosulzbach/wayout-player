@@ -19,5 +19,6 @@ script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  - clang-tidy ../src/*
   - make
   - ./test

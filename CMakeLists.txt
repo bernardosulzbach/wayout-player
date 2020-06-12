@@ -89,18 +89,17 @@ add_library(
 
 find_package(Threads REQUIRED)
 
-add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
-
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_SSL_LIBRARY})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${Boost_LIBRARIES})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OpenCV_LIBS})
 
-target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
-
 add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
 target_link_libraries(player ${WAYOUT_PLAYER_LINK_LIBRARIES})
+
+add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
+target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 if(HAS_IPO_SUPPORT)
   message(STATUS "IPO enabled")

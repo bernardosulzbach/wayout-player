@@ -20,7 +20,8 @@ Board boardFromInputPath(const ArgumentParser &argumentParser) {
   if (inputPath.ends_with(".txt")) {
     const auto boardString = readFile(inputPath);
     return Board::fromString(boardString);
-  } else if (inputPath.ends_with(".png")) {
+  }
+  if (inputPath.ends_with(".png")) {
     const auto image = readImageFromFile(inputPath);
     BoardScanner boardScanner;
     if (argumentParser.hasArgument(ArgumentFactory::makeDebuggingPathArgument())) {

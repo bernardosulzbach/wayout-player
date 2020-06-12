@@ -1,5 +1,7 @@
 #include "Board.hpp"
 
+#include <cctype>
+
 #include <boost/functional/hash.hpp>
 
 namespace WayoutPlayer {
@@ -267,10 +269,9 @@ Board Board::mergeComponents(const std::vector<Board> &components) {
   for (const auto &component : components) {
     if (component.getRowCount() != rowCount) {
       throw std::invalid_argument("Components have different number of rows.");
-    } else {
-      if (component.getColumnCount() != columnCount) {
-        throw std::invalid_argument("Components have different number of columns.");
-      }
+    }
+    if (component.getColumnCount() != columnCount) {
+      throw std::invalid_argument("Components have different number of columns.");
     }
   }
   Board merge(std::vector<std::vector<std::optional<Tile>>>(rowCount, std::vector<std::optional<Tile>>(columnCount)));
@@ -281,9 +282,8 @@ Board Board::mergeComponents(const std::vector<Board> &components) {
           if (merge.hasTile(i, j)) {
             const auto position = Position(i, j);
             throw std::invalid_argument("Found two occurrences of tile " + position.toString() + ".");
-          } else {
-            merge.matrix[i][j] = component.matrix[i][j];
           }
+          merge.matrix[i][j] = component.matrix[i][j];
         }
       }
     }
@@ -322,7 +322,7 @@ Board Board::fromString(const std::string &string) {
   for (std::size_t i = 0; i < string.size(); i++) {
     const auto character = string[i];
     if (atNextTile) {
-      if (isalpha(character)) {
+      if (std::isalpha(character) != 0) {
         matrix.back().emplace_back(Tile(false, tileTypeFromCharacter(character)));
         atNextTile = false;
       } else if (character == ' ') {
@@ -333,7 +333,7 @@ Board Board::fromString(const std::string &string) {
         throw std::invalid_argument("Found an unexpected start of tile: " + std::string(1, character) + ".");
       }
     } else {
-      if (isdigit(character)) {
+      if (std::isdigit(character) != 0) {
         matrix.back().back()->up = character == '1';
       } else if (character == '\n') {
         matrix.emplace_back();

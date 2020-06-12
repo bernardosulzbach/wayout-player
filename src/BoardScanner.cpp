@@ -19,16 +19,16 @@ static constexpr std::array<U32, 9> ObservedRaisedSideSizes = {1241, 1349, 1358,
 static constexpr std::array<U32, 4> ObservedLoweredSideSizes = {873, 872, 870, 867};
 static constexpr std::array<U32, 4> ObservedArrowSizes = {125, 130, 133, 135};
 
-static constexpr auto RelativeTolerance = 0.05f;
-static_assert(RelativeTolerance > 0.0f);
-static_assert(RelativeTolerance < 1.0f);
+static constexpr auto RelativeTolerance = 0.05F;
+static_assert(RelativeTolerance > 0.0F);
+static_assert(RelativeTolerance < 1.0F);
 
 template <std::size_t N> static constexpr U32 getScaledMinimumObservedSizes(const std::array<U32, N> &observedSizes) {
-  return *std::min_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0f - RelativeTolerance);
+  return *std::min_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0F - RelativeTolerance);
 }
 
 template <std::size_t N> static constexpr U32 getScaledMaximumObservedSizes(const std::array<U32, N> &observedSizes) {
-  return *std::max_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0f + RelativeTolerance);
+  return *std::max_element(std::begin(observedSizes), std::end(observedSizes)) * (1.0F + RelativeTolerance);
 }
 
 static constexpr auto MinimumExpectedTopSize = getScaledMinimumObservedSizes(ObservedTopSizes);
@@ -46,17 +46,20 @@ static constexpr auto MaximumExpectedArrowSize = getScaledMaximumObservedSizes(O
 static constexpr auto HeightChange = 17;
 
 static F32 getScaledMinimumExpectedLoweredSaturation() {
-  return 0.0f;
+  return 0.0F;
 }
 
 static F32 getScaledMaximumExpectedLoweredSaturation() {
-  return 0.01f;
+  return 0.01F;
 }
 
 static constexpr auto EdgesImageFilename = "edges.png";
 
 static constexpr auto ComponentsTextFilename = "components.txt";
 static constexpr auto ComponentsImageFilename = "components.png";
+
+static constexpr U32 ExpectedImageWidth = 1920U;
+static constexpr U32 ExpectedImageHeight = 1080U;
 
 BoardScanner::BoardScanner() = default;
 
@@ -105,8 +108,12 @@ ComponentTable findComponents(const MaskComponentFinder &componentFinder) {
 
 Board BoardScanner::scan(const Image &image) {
   // For now, this only supports the game in 1080p.
-  if (image.getWidth() != 1920 || image.getHeight() != 1080) {
-    throw std::invalid_argument("Image is not 1920x1080. Scaling issues prevent other sizes from being used.");
+  // Scaling issues prevent other sizes from being used.
+  if (image.getWidth() != ExpectedImageWidth) {
+    throw std::invalid_argument("Image width is not " + std::to_string(ExpectedImageWidth) + ".");
+  }
+  if (image.getHeight() != ExpectedImageHeight) {
+    throw std::invalid_argument("Image height is not " + std::to_string(ExpectedImageHeight) + ".");
   }
   // Find the darkest edges.
   auto mask = image.findPixels([](const Color<U8> color) { return color.getLightness() <= 25.0f; });
@@ -158,8 +165,8 @@ Board BoardScanner::scan(const Image &image) {
   std::unordered_map<U32, Color<U8>> componentOfInterestColor;
   U32 componentOfInterestIndex = 0;
   for (const auto component : components[ImageComponentType::Top]) {
-    const auto hue = 360.0f * componentOfInterestIndex / components[ImageComponentType::Top].size();
-    componentOfInterestColor[component] = Color<U8>::fromHSV(hue, 0.8f, 0.8f);
+    const auto hue = 360.0F * componentOfInterestIndex / components[ImageComponentType::Top].size();
+    componentOfInterestColor[component] = Color<U8>::fromHSV(hue, 0.8F, 0.8F);
     componentOfInterestIndex++;
   }
   std::unordered_map<U32, Average<Color<F32>>> componentOfInterestAverageColor;
