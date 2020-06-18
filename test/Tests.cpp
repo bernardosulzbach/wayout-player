@@ -6,6 +6,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../src/Board.hpp"
+#include "../src/BoardComponentSplitter.hpp"
 #include "../src/BoardScanner.hpp"
 #include "../src/Hashing.hpp"
 #include "../src/Image.hpp"
@@ -50,16 +51,16 @@ BOOST_AUTO_TEST_CASE(boardIsSolvedWorksOnUnsolvedBoards) {
 BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithDefaultTiles) {
   const auto *const connectedBoardString = "D0 D0\n"
                                            "   D0";
-  BOOST_CHECK(Board::fromString(connectedBoardString).splitComponents().size() == 1);
+  BOOST_CHECK(splitComponents(Board::fromString(connectedBoardString)).size() == 1);
   const auto *const disconnectedBoardString = "D0   \n"
                                               "   D0";
-  BOOST_CHECK(Board::fromString(disconnectedBoardString).splitComponents().size() == 2);
+  BOOST_CHECK(splitComponents(Board::fromString(disconnectedBoardString)).size() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(boardSplittingShouldWorkWithTwins) {
   const auto *const boardString = "P0   \n"
                                   "   P0";
-  BOOST_CHECK(Board::fromString(boardString).splitComponents().size() == 1);
+  BOOST_CHECK(splitComponents(Board::fromString(boardString)).size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(boardConversionsTest) {
@@ -197,10 +198,10 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldJudgeTheNeedForMultipleClicks) {
   const auto *const boardString = "D0    B1 D0\n"
                                   "D1    D0 B1";
   const auto board = Board::fromString(boardString);
-  BOOST_CHECK(board.splitComponents().size() == 2);
+  BOOST_CHECK(splitComponents(board).size() == 2);
   auto requiringMultipleClicks = 0;
   auto notRequiringMultipleClicks = 0;
-  for (const auto &component : board.splitComponents()) {
+  for (const auto &component : splitComponents(board)) {
     if (component.mayNeedMultipleClicks()) {
       requiringMultipleClicks++;
     } else {
@@ -239,7 +240,7 @@ BOOST_AUTO_TEST_CASE(shouldFindComponentsInASmallBoardWithBlockedTiles) {
   const auto *const boardString = "B1 D0\n"
                                   "D0 B1";
   const auto board = Board::fromString(boardString);
-  const auto components = board.splitComponents();
+  const auto components = splitComponents(board);
   BOOST_CHECK(components.size() == 1);
 }
 
@@ -247,11 +248,11 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldWork) {
   const auto *const boardString = "D0   \n"
                                   "   D1";
   const auto board = Board::fromString(boardString);
-  const auto components = board.splitComponents();
+  const auto components = splitComponents(board);
   BOOST_CHECK(components.size() == 2);
   BOOST_CHECK(components[0] != board);
   BOOST_CHECK(components[1] != board);
-  BOOST_CHECK(Board::mergeComponents(components) == board);
+  BOOST_CHECK(mergeComponents(components) == board);
 }
 
 BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
@@ -261,10 +262,10 @@ BOOST_AUTO_TEST_CASE(splittingComponentsShouldRespectTwins) {
                                   "P1    D0 D1 D0\n"
                                   "D1 D0         ";
   const auto board = Board::fromString(boardString);
-  const auto components = board.splitComponents();
+  const auto components = splitComponents(board);
   BOOST_CHECK(components.size() == 1);
   BOOST_CHECK(components.front() == board);
-  BOOST_CHECK(Board::mergeComponents(components) == board);
+  BOOST_CHECK(mergeComponents(components) == board);
 }
 
 BOOST_AUTO_TEST_CASE(readingAndWritingImageToFiles) {

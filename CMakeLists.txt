@@ -50,6 +50,8 @@ add_library(
   src/Average.hpp
   src/Board.cpp
   src/Board.hpp
+  src/BoardComponentSplitter.cpp
+  src/BoardComponentSplitter.hpp
   src/BoardScanner.cpp
   src/BoardScanner.hpp
   src/Color.hpp

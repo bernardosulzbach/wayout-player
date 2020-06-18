@@ -5,6 +5,7 @@
 #include <queue>
 #include <unordered_set>
 
+#include "BoardComponentSplitter.hpp"
 #include "Text.hpp"
 
 namespace WayoutPlayer {
@@ -159,7 +160,7 @@ Solution Solver::findSolutionWithoutSplitting(const Board &initialBoard) const {
 }
 
 Solution Solver::findSolution(const Board &initialBoard) const {
-  const auto components = initialBoard.splitComponents();
+  const auto components = splitComponents(initialBoard);
   if (getSolverConfiguration().isVerbose()) {
     std::cout << "Found " << toPluralizedString(components.size(), "component") << "." << '\n';
   }
