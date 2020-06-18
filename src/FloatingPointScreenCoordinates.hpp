@@ -19,6 +19,8 @@ public:
 
   [[nodiscard]] F32 getJ() const noexcept;
 
+  [[nodiscard]] F32 distanceTo(const FloatingPointScreenCoordinates &rhs) const;
+
   [[nodiscard]] IntegralScreenCoordinates roundToIntegralScreenCoordinates() const noexcept;
 };
 } // namespace WayoutPlayer

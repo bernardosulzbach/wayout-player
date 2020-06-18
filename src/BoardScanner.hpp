@@ -7,9 +7,11 @@ namespace WayoutPlayer {
 class BoardScanner {
   std::optional<std::filesystem::path> debuggingPath;
 
-public:
-  BoardScanner();
+  [[nodiscard]] bool isDebugging() const noexcept;
 
+  void writeSizeRanges() const;
+
+public:
   Board scan(const Image &image);
 
   void setDebuggingPath(std::optional<std::filesystem::path> newDebuggingPath);

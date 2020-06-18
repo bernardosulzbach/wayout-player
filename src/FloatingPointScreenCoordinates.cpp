@@ -22,6 +22,10 @@ F32 FloatingPointScreenCoordinates::getJ() const noexcept {
   return j;
 }
 
+F32 FloatingPointScreenCoordinates::distanceTo(const FloatingPointScreenCoordinates &rhs) const {
+  return std::hypot(getI() - rhs.getI(), getJ() - rhs.getJ());
+}
+
 IntegralScreenCoordinates FloatingPointScreenCoordinates::roundToIntegralScreenCoordinates() const noexcept {
   return IntegralScreenCoordinates(std::round(getI()), std::round(getJ()));
 }

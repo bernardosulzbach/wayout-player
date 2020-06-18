@@ -45,6 +45,9 @@ static constexpr auto MaximumExpectedArrowSize = getScaledMaximumObservedSizes(O
 
 static constexpr auto HeightChange = 17;
 
+// This is valid for 1920x1080 images.
+static constexpr auto MaximumArrowDistanceToCentroid = std::hypot(18.0f, 11.0f);
+
 static F32 getScaledMinimumExpectedLoweredSaturation() {
   return 0.0F;
 }
@@ -61,7 +64,9 @@ static constexpr auto ComponentsImageFilename = "components.png";
 static constexpr U32 ExpectedImageWidth = 1920U;
 static constexpr U32 ExpectedImageHeight = 1080U;
 
-BoardScanner::BoardScanner() = default;
+bool BoardScanner::isDebugging() const noexcept {
+  return debuggingPath.has_value();
+}
 
 static void dumpComponentSizes(const MaskComponentFinder &componentFinder, std::ofstream &outputStream) {
   std::vector<U32> componentSizes(componentFinder.getComponentCount());
@@ -106,6 +111,41 @@ ComponentTable findComponents(const MaskComponentFinder &componentFinder) {
   return components;
 }
 
+void BoardScanner::writeSizeRanges() const {
+  if (isDebugging()) {
+    std::ofstream textFile(debuggingPath.value() / ComponentsTextFilename, std::ios::app);
+    const auto writeExpectedRange = [&textFile](const std::string &type, const U32 low, const U32 high) {
+      textFile << type << " are expected to range from " << low << " to " << high << "." << '\n';
+    };
+    writeExpectedRange("Tops", MinimumExpectedTopSize, MaximumExpectedTopSize);
+    writeExpectedRange("Raised sides", MinimumExpectedRaisedSideSize, MaximumExpectedRaisedSideSize);
+    writeExpectedRange("Lowered sides", MinimumExpectedLoweredSideSize, MaximumExpectedLoweredSideSize);
+    writeExpectedRange("Arrows", MinimumExpectedArrowSize, MaximumExpectedArrowSize);
+    textFile << std::string(80, '-') << '\n';
+  }
+}
+
+static std::vector<FloatingPointScreenCoordinates>
+findClosest(const std::vector<FloatingPointScreenCoordinates> &coordinateVector,
+            const FloatingPointScreenCoordinates coordinates, const U32 count) {
+  assert(count > 0);
+  if (count > coordinateVector.size()) {
+    throw std::invalid_argument("The provided vector does not have enough elements.");
+  }
+  std::vector<std::pair<F32, U32>> distanceVector;
+  for (U32 i = 0; i < coordinateVector.size(); i++) {
+    distanceVector.push_back({coordinateVector[i].distanceTo(coordinates), i});
+  }
+  std::partial_sort(std::begin(distanceVector), std::begin(distanceVector) + count, std::end(distanceVector));
+  std::vector<FloatingPointScreenCoordinates> closest;
+  closest.reserve(count);
+  for (U32 i = 0; i < count; i++) {
+    closest.push_back(coordinateVector[distanceVector[i].second]);
+  }
+  return closest;
+}
+
+using CentroidVectorMap = std::unordered_map<ImageComponentType, std::vector<FloatingPointScreenCoordinates>>;
 Board BoardScanner::scan(const Image &image) {
   // For now, this only supports the game in 1080p.
   // Scaling issues prevent other sizes from being used.
@@ -129,12 +169,12 @@ Board BoardScanner::scan(const Image &image) {
       }
     }
   }
-  if (debuggingPath) {
+  if (isDebugging()) {
     imageCopy.writeImageToFile(debuggingPath.value() / EdgesImageFilename);
   }
   MaskComponentFinder componentFinder(mask);
   const auto componentCount = componentFinder.getComponentCount();
-  if (debuggingPath) {
+  if (isDebugging()) {
     std::ofstream outputStream(debuggingPath.value() / ComponentsTextFilename);
     dumpComponentSizes(componentFinder, outputStream);
   }
@@ -144,20 +184,18 @@ Board BoardScanner::scan(const Image &image) {
   // Cannot be made constants as getSaturation() is not a constant-expression.
   const auto MinimumExpectedLoweredSaturation = getScaledMinimumExpectedLoweredSaturation();
   const auto MaximumExpectedLoweredSaturation = getScaledMaximumExpectedLoweredSaturation();
-  if (debuggingPath) {
-    std::ofstream textFile(debuggingPath.value() / ComponentsTextFilename, std::ios::app);
-    const auto writeExpectedRange = [&textFile](const std::string &type, const U32 low, const U32 high) {
-      textFile << type << " are expected to range from " << low << " to " << high << "." << '\n';
-    };
-    writeExpectedRange("Tops", MinimumExpectedTopSize, MaximumExpectedTopSize);
-    writeExpectedRange("Raised sides", MinimumExpectedRaisedSideSize, MaximumExpectedRaisedSideSize);
-    writeExpectedRange("Lowered sides", MinimumExpectedLoweredSideSize, MaximumExpectedLoweredSideSize);
-    writeExpectedRange("Arrows", MinimumExpectedArrowSize, MaximumExpectedArrowSize);
-    textFile << std::string(80, '-') << '\n';
+  if (isDebugging()) {
+    writeSizeRanges();
   }
   auto components = findComponents(componentFinder);
+  if (components[ImageComponentType::Arrow].size() % 2 != 0) {
+    throw std::runtime_error("The number of arrows should be even.");
+  }
+  CentroidVectorMap dissolvedCentroids;
   // Dissolve all arrows.
   for (const auto componentId : components[ImageComponentType::Arrow]) {
+    const auto floatingPointCoordinates = componentFinder.getComponentCentroid(componentId);
+    dissolvedCentroids[ImageComponentType::Arrow].push_back(floatingPointCoordinates);
     componentFinder.dissolveComponent(componentId);
   }
   // Re-find the components.
@@ -186,7 +224,7 @@ Board BoardScanner::scan(const Image &image) {
     const auto highContrastGrey = componentOfInterestColor[componentId].getHighContrastGrey();
     imageCopy.setCross(coordinates.getI(), coordinates.getJ(), 5, highContrastGrey);
   }
-  if (debuggingPath) {
+  if (isDebugging()) {
     imageCopy.writeImageToFile(debuggingPath.value() / ComponentsImageFilename);
     std::ofstream textFile(debuggingPath.value() / ComponentsTextFilename, std::ios::app);
     for (const auto componentId : components[ImageComponentType::Top]) {
@@ -207,12 +245,31 @@ Board BoardScanner::scan(const Image &image) {
     }
   }
   std::unordered_map<U32, std::pair<IndexType, IndexType>> componentPositions;
+  std::unordered_map<U32, TileType> componentTypes;
   std::optional<IntegralScreenCoordinates> originComponentCoordinates;
   for (const auto componentId : components[ImageComponentType::Top]) {
-    const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
+    const auto floatingPointCentroid = componentFinder.getComponentCentroid(componentId);
+    const auto coordinates = floatingPointCentroid.roundToIntegralScreenCoordinates();
     const auto averageColor = componentOfInterestAverageColor[componentId].getAverage();
     const auto saturation = averageColor.getSaturation();
     const auto isUp = !inRange(MinimumExpectedLoweredSaturation, saturation, MaximumExpectedLoweredSaturation);
+    // Assume it is default, this will be overwritten later.
+    componentTypes[componentId] = TileType::Default;
+    if (!dissolvedCentroids[ImageComponentType::Arrow].empty()) {
+      const auto &centroids = dissolvedCentroids[ImageComponentType::Arrow];
+      auto closestTwoArrows = findClosest(centroids, floatingPointCentroid, 2);
+      if (closestTwoArrows[1].distanceTo(floatingPointCentroid) < MaximumArrowDistanceToCentroid) {
+        assert(closestTwoArrows.size() == 2);
+        if (closestTwoArrows[0].getI() > closestTwoArrows[1].getI()) {
+          std::swap(closestTwoArrows[0], closestTwoArrows[1]);
+        }
+        if (closestTwoArrows[0].getJ() < closestTwoArrows[1].getJ()) {
+          componentTypes[componentId] = TileType::Vertical;
+        } else {
+          componentTypes[componentId] = TileType::Horizontal;
+        }
+      }
+    }
     // Normalize the i coordinate if the tile is lowered.
     const auto i = coordinates.getI() - (isUp ? 0 : HeightChange);
     const auto j = coordinates.getJ();
@@ -258,7 +315,7 @@ Board BoardScanner::scan(const Image &image) {
     const auto isUp = !inRange(MinimumExpectedLoweredSaturation, saturation, MaximumExpectedLoweredSaturation);
     const auto i = componentPositions[componentId].first;
     const auto j = componentPositions[componentId].second;
-    matrix[i - iRange.getLow()][j - jRange.getLow()] = Tile(isUp, TileType::Default);
+    matrix[i - iRange.getLow()][j - jRange.getLow()] = Tile(isUp, componentTypes[componentId]);
   }
   return Board(matrix);
 }
