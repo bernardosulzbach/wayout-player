@@ -15,7 +15,11 @@ addons:
       - libopencv-dev
 
 script:
+  # Ensure our namespace is always used.
   - diff <(ls -l src | grep -i hpp | wc -l) <(git grep "namespace WayoutPlayer {" -- src | grep -i hpp | wc -l)
+  # Ensure code is already properly formatted.
+  - diff -u <(cat src/* test/*) <(clang-format src/* test/*)
+  # Ensure no committed file is larger than the file size limit.
   - python3 scripts/ensure_git_has_no_large_files.py
   - mkdir build && cd build || exit
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
