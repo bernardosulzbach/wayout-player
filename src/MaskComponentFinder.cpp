@@ -144,9 +144,9 @@ std::vector<ComponentId> MaskComponentFinder::getComponentsTouchingEdge(const In
   std::unordered_set<ComponentId> components;
   for (const auto coordinates : set) {
     for (const auto neighbor : getNeighbors(coordinates)) {
-      const auto componentId = getComponentId(neighbor);
-      if (componentId != None) {
-        components.insert(componentId);
+      const auto neighborId = getComponentId(neighbor);
+      if (neighborId != None) {
+        components.insert(neighborId);
       }
     }
   }
