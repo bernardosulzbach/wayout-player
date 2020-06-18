@@ -16,8 +16,8 @@ addons:
 
 script:
   - diff <(ls -l src | grep -i hpp | wc -l) <(git grep "namespace WayoutPlayer {" -- src | grep -i hpp | wc -l)
-  - mkdir build
-  - cd build
+  - python3 scripts/ensure_git_has_no_large_files.py
+  - mkdir build && cd build || exit
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
   - clang-tidy ../src/*
   - make
