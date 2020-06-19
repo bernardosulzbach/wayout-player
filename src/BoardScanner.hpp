@@ -2,6 +2,7 @@
 
 #include "Board.hpp"
 #include "Image.hpp"
+#include "MaskComponentFinder.hpp"
 
 namespace WayoutPlayer {
 class BoardScanner {
@@ -10,6 +11,10 @@ class BoardScanner {
   [[nodiscard]] bool isDebugging() const noexcept;
 
   void writeSizeRanges() const;
+
+  void writeColoredByComponent(const MaskComponentFinder &componentFinder,
+                               const std::vector<MaskComponentFinder::ComponentId> &componentIds,
+                               const std::string &filename) const;
 
 public:
   Board scan(const Image &image);

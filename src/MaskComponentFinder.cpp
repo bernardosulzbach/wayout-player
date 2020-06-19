@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Text.hpp"
+
 namespace WayoutPlayer {
 using ComponentId = MaskComponentFinder::ComponentId;
 using IntegralScreenCoordinatesVector = std::vector<IntegralScreenCoordinates>;
@@ -119,7 +121,7 @@ IntegralScreenCoordinatesSet MaskComponentFinder::getEdgeAroundComponent(const C
   IntegralScreenCoordinatesSet set;
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
-      if (componentId[i][j] == id) {
+      if (getComponentId(IntegralScreenCoordinates(i, j)) == id) {
         for (const auto neighbor : getNeighbors(IntegralScreenCoordinates(i, j))) {
           if (getComponentId(neighbor) == None && !set.contains(neighbor)) {
             floodFill(neighbor, [this, &set](const IntegralScreenCoordinates coordinates) {
@@ -157,7 +159,12 @@ void MaskComponentFinder::dissolveComponent(const ComponentId id) {
   const auto edge = getEdgeAroundComponent(id);
   auto touchingEdge = getComponentsTouchingEdge(edge);
   if (touchingEdge.size() != 2) {
-    throw std::runtime_error("Expected exactly two components to be touching the edge.");
+    const auto numberString = std::to_string(touchingEdge.size());
+    std::string message = "Expected exactly 2 components to be touching the edge, but found " + numberString;
+    std::sort(std::begin(touchingEdge), std::end(touchingEdge));
+    const auto componentList = joinIntoString(touchingEdge, ", ");
+    message += " (" + joinIntoString(touchingEdge, ", ") + ").";
+    throw std::runtime_error(message);
   }
   touchingEdge.erase(std::remove(std::begin(touchingEdge), std::end(touchingEdge), id), std::end(touchingEdge));
   if (touchingEdge.size() != 1) {

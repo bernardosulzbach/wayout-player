@@ -3,6 +3,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <unordered_set>
 #include <utility>
 
@@ -12,12 +13,14 @@
 #include "MaskComponentFinder.hpp"
 #include "Numeric.hpp"
 #include "Range.hpp"
+#include "Text.hpp"
 
 namespace WayoutPlayer {
 static constexpr std::array<U32, 9> ObservedTopSizes = {4709, 4711, 4722, 4720, 4722, 4723, 4842, 4723, 4577};
 static constexpr std::array<U32, 9> ObservedRaisedSideSizes = {1241, 1349, 1358, 1426, 1432, 1550, 1552, 1595, 1778};
 static constexpr std::array<U32, 4> ObservedLoweredSideSizes = {873, 872, 870, 867};
 static constexpr std::array<U32, 4> ObservedArrowSizes = {125, 130, 133, 135};
+static constexpr std::array<U32, 1> ObservedDiskSizes = {1157};
 
 static constexpr auto RelativeTolerance = 0.05F;
 static_assert(RelativeTolerance > 0.0F);
@@ -43,10 +46,16 @@ static constexpr auto MaximumExpectedLoweredSideSize = getScaledMaximumObservedS
 static constexpr auto MinimumExpectedArrowSize = getScaledMinimumObservedSizes(ObservedArrowSizes);
 static constexpr auto MaximumExpectedArrowSize = getScaledMaximumObservedSizes(ObservedArrowSizes);
 
+static constexpr auto MinimumExpectedDiskSize = getScaledMinimumObservedSizes(ObservedDiskSizes);
+static constexpr auto MaximumExpectedDiskSize = getScaledMaximumObservedSizes(ObservedDiskSizes);
+
 static constexpr auto HeightChange = 17;
+
+static constexpr auto LightGrey = Color<U8>(224, 224, 224);
 
 // This is valid for 1920x1080 images.
 static constexpr auto MaximumArrowDistanceToCentroid = std::hypot(18.0f, 11.0f);
+static constexpr auto MaximumDiskDistanceToCentroid = std::hypot(1.0f, 1.0f);
 
 static F32 getScaledMinimumExpectedLoweredSaturation() {
   return 0.0F;
@@ -74,17 +83,18 @@ static void dumpComponentSizes(const MaskComponentFinder &componentFinder, std::
     componentSizes[componentId] = componentFinder.getComponentSize(componentId);
   }
   std::sort(std::begin(componentSizes), std::end(componentSizes));
-  for (const auto size : componentSizes) {
-    outputStream << size << '\n';
-  }
-  outputStream << '\n';
+  outputStream << joinIntoString(componentSizes, ", ") << '\n';
 }
 
-using ComponentTable = std::unordered_map<ImageComponentType, std::unordered_set<MaskComponentFinder::ComponentId>>;
+using ComponentId = MaskComponentFinder::ComponentId;
+using ComponentTable = std::unordered_map<ImageComponentType, std::unordered_set<ComponentId>>;
 ComponentTable findComponents(const MaskComponentFinder &componentFinder) {
   ComponentTable components;
-  const auto writeAboutComponent = [](ImageComponentType componentType, IntegralScreenCoordinates coordinates) {
+  const auto writeAboutComponent = [&componentFinder](ImageComponentType componentType, ComponentId componentId) {
     std::cout << "Found a component of type (" << imageComponentTypeToString(componentType) << ")" << ' ';
+    const auto size = componentFinder.getComponentSize(componentId);
+    std::cout << "of size " << size << ' ';
+    const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
     std::cout << "centered at (" << coordinates.getI() << ", " << coordinates.getJ() << ")." << '\n';
   };
   for (U32 component = 0; component < componentFinder.getComponentCount(); component++) {
@@ -93,19 +103,21 @@ ComponentTable findComponents(const MaskComponentFinder &componentFinder) {
     if (componentSize == 0) {
       continue;
     }
-    const auto coordinates = componentFinder.getComponentCentroid(component).roundToIntegralScreenCoordinates();
     if (inRange(MinimumExpectedTopSize, componentSize, MaximumExpectedTopSize)) {
       components[ImageComponentType::Top].insert(component);
-      writeAboutComponent(ImageComponentType::Top, coordinates);
+      writeAboutComponent(ImageComponentType::Top, component);
     } else if (inRange(MinimumExpectedRaisedSideSize, componentSize, MinimumExpectedRaisedSideSize)) {
       components[ImageComponentType::RaisedSide].insert(component);
-      writeAboutComponent(ImageComponentType::RaisedSide, coordinates);
+      writeAboutComponent(ImageComponentType::RaisedSide, component);
     } else if (inRange(MinimumExpectedLoweredSideSize, componentSize, MaximumExpectedLoweredSideSize)) {
       components[ImageComponentType::LoweredSide].insert(component);
-      writeAboutComponent(ImageComponentType::LoweredSide, coordinates);
+      writeAboutComponent(ImageComponentType::LoweredSide, component);
     } else if (inRange(MinimumExpectedArrowSize, componentSize, MaximumExpectedArrowSize)) {
       components[ImageComponentType::Arrow].insert(component);
-      writeAboutComponent(ImageComponentType::Arrow, coordinates);
+      writeAboutComponent(ImageComponentType::Arrow, component);
+    } else if (inRange(MinimumExpectedDiskSize, componentSize, MaximumExpectedDiskSize)) {
+      components[ImageComponentType::Disk].insert(component);
+      writeAboutComponent(ImageComponentType::Disk, component);
     }
   }
   return components;
@@ -121,8 +133,43 @@ void BoardScanner::writeSizeRanges() const {
     writeExpectedRange("Raised sides", MinimumExpectedRaisedSideSize, MaximumExpectedRaisedSideSize);
     writeExpectedRange("Lowered sides", MinimumExpectedLoweredSideSize, MaximumExpectedLoweredSideSize);
     writeExpectedRange("Arrows", MinimumExpectedArrowSize, MaximumExpectedArrowSize);
+    writeExpectedRange("Disks", MinimumExpectedDiskSize, MaximumExpectedDiskSize);
     textFile << std::string(80, '-') << '\n';
   }
+}
+
+using ComponentIdToColorMap = std::unordered_map<ComponentId, Color<U8>>;
+static ComponentIdToColorMap makeUniformlyDistributedColors(const std::vector<ComponentId> &componentIds) {
+  ComponentIdToColorMap componentOfInterestColor;
+  for (U32 componentOfInterestIndex = 0; componentOfInterestIndex < componentIds.size(); componentOfInterestIndex++) {
+    const auto hue = 360.0F * componentOfInterestIndex / componentIds.size();
+    componentOfInterestColor[componentIds[componentOfInterestIndex]] = Color<U8>::fromHSV(hue, 0.8F, 0.8F);
+  }
+  return componentOfInterestColor;
+};
+
+void BoardScanner::writeColoredByComponent(const MaskComponentFinder &componentFinder,
+                                           const std::vector<ComponentId> &componentIds,
+                                           const std::string &filename) const {
+  assert(debuggingPath.has_value());
+  Image image(componentFinder.getHeight(), componentFinder.getWidth());
+  const auto componentOfInterestColor = makeUniformlyDistributedColors(componentIds);
+  for (U32 i = 0; i < componentFinder.getHeight(); i++) {
+    for (U32 j = 0; j < componentFinder.getWidth(); j++) {
+      const auto componentId = componentFinder.getComponentId({i, j});
+      if (componentId == MaskComponentFinder::None) {
+        image.setPixel(i, j, LightGrey);
+      } else if (componentOfInterestColor.contains(componentId)) {
+        image.setPixel(i, j, componentOfInterestColor.at(componentId));
+      }
+    }
+  }
+  for (const auto componentId : componentIds) {
+    const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
+    const auto highContrastGrey = componentOfInterestColor.at(componentId).getHighContrastGrey();
+    image.setCross(coordinates.getI(), coordinates.getJ(), 5, highContrastGrey);
+  }
+  image.writeImageToFile(debuggingPath.value() / filename);
 }
 
 static std::vector<FloatingPointScreenCoordinates>
@@ -159,20 +206,13 @@ Board BoardScanner::scan(const Image &image) {
   auto mask = image.findPixels([](const Color<U8> color) { return color.getLightness() <= 25.0f; });
   // Open them by including their lighter neighbors.
   mask.open([&image](const U32 i, const U32 j) { return image.getPixel(i, j).getLightness() <= 32.5f; });
-  auto imageCopy = image;
-  for (U32 i = 0; i < image.getHeight(); i++) {
-    for (U32 j = 0; j < image.getWidth(); j++) {
-      if (mask.getValue(i, j)) {
-        imageCopy.setPixel(i, j, Color<U8>(255, 255, 255));
-      } else {
-        imageCopy.setPixel(i, j, Color<U8>(0, 0, 0));
-      }
-    }
-  }
-  if (isDebugging()) {
-    imageCopy.writeImageToFile(debuggingPath.value() / EdgesImageFilename);
-  }
   MaskComponentFinder componentFinder(mask);
+  if (isDebugging()) {
+    writeColoredByComponent(componentFinder, {}, EdgesImageFilename);
+    std::vector<ComponentId> ids(componentFinder.getComponentCount());
+    std::iota(std::begin(ids), std::end(ids), 0U);
+    writeColoredByComponent(componentFinder, ids, ComponentsImageFilename);
+  }
   const auto componentCount = componentFinder.getComponentCount();
   if (isDebugging()) {
     std::ofstream outputStream(debuggingPath.value() / ComponentsTextFilename);
@@ -192,21 +232,21 @@ Board BoardScanner::scan(const Image &image) {
     throw std::runtime_error("The number of arrows should be even.");
   }
   CentroidVectorMap dissolvedCentroids;
-  // Dissolve all arrows.
-  for (const auto componentId : components[ImageComponentType::Arrow]) {
-    const auto floatingPointCoordinates = componentFinder.getComponentCentroid(componentId);
-    dissolvedCentroids[ImageComponentType::Arrow].push_back(floatingPointCoordinates);
-    componentFinder.dissolveComponent(componentId);
+  // Dissolve all features.
+  const auto featureComponentTypes = {ImageComponentType::Arrow, ImageComponentType::Disk};
+  for (const auto imageComponentType : featureComponentTypes) {
+    for (const auto componentId : components[imageComponentType]) {
+      const auto floatingPointCoordinates = componentFinder.getComponentCentroid(componentId);
+      dissolvedCentroids[imageComponentType].push_back(floatingPointCoordinates);
+      const auto integralScreenCoordinates = floatingPointCoordinates.roundToIntegralScreenCoordinates();
+      std::cout << "Dissolving " << componentId << " centered at ";
+      std::cout << "(" << integralScreenCoordinates.getI() << ", " << integralScreenCoordinates.getJ() << ")";
+      std::cout << "." << '\n';
+      componentFinder.dissolveComponent(componentId);
+    }
   }
   // Re-find the components.
   components = findComponents(componentFinder);
-  std::unordered_map<U32, Color<U8>> componentOfInterestColor;
-  U32 componentOfInterestIndex = 0;
-  for (const auto component : components[ImageComponentType::Top]) {
-    const auto hue = 360.0F * componentOfInterestIndex / components[ImageComponentType::Top].size();
-    componentOfInterestColor[component] = Color<U8>::fromHSV(hue, 0.8F, 0.8F);
-    componentOfInterestIndex++;
-  }
   std::unordered_map<U32, Average<Color<F32>>> componentOfInterestAverageColor;
   for (U32 i = 0; i < componentFinder.getHeight(); i++) {
     for (U32 j = 0; j < componentFinder.getWidth(); j++) {
@@ -214,18 +254,11 @@ Board BoardScanner::scan(const Image &image) {
       if (!components[ImageComponentType::Top].contains(componentId)) {
         continue;
       }
-      imageCopy.setPixel(i, j, componentOfInterestColor[componentId]);
       const auto color = image.getPixel(i, j);
       componentOfInterestAverageColor[componentId].add(Color<F32>(color.getR(), color.getG(), color.getB()));
     }
   }
-  for (const auto componentId : components[ImageComponentType::Top]) {
-    const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
-    const auto highContrastGrey = componentOfInterestColor[componentId].getHighContrastGrey();
-    imageCopy.setCross(coordinates.getI(), coordinates.getJ(), 5, highContrastGrey);
-  }
   if (isDebugging()) {
-    imageCopy.writeImageToFile(debuggingPath.value() / ComponentsImageFilename);
     std::ofstream textFile(debuggingPath.value() / ComponentsTextFilename, std::ios::app);
     for (const auto componentId : components[ImageComponentType::Top]) {
       const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
@@ -258,7 +291,7 @@ Board BoardScanner::scan(const Image &image) {
     if (!dissolvedCentroids[ImageComponentType::Arrow].empty()) {
       const auto &centroids = dissolvedCentroids[ImageComponentType::Arrow];
       auto closestTwoArrows = findClosest(centroids, floatingPointCentroid, 2);
-      if (closestTwoArrows[1].distanceTo(floatingPointCentroid) < MaximumArrowDistanceToCentroid) {
+      if (closestTwoArrows[1].distanceTo(floatingPointCentroid) <= MaximumArrowDistanceToCentroid) {
         assert(closestTwoArrows.size() == 2);
         if (closestTwoArrows[0].getI() > closestTwoArrows[1].getI()) {
           std::swap(closestTwoArrows[0], closestTwoArrows[1]);
@@ -268,6 +301,13 @@ Board BoardScanner::scan(const Image &image) {
         } else {
           componentTypes[componentId] = TileType::Horizontal;
         }
+      }
+    }
+    if (!dissolvedCentroids[ImageComponentType::Disk].empty()) {
+      const auto &centroids = dissolvedCentroids[ImageComponentType::Disk];
+      const auto closestDisk = findClosest(centroids, floatingPointCentroid, 1);
+      if (closestDisk[0].distanceTo(floatingPointCentroid) <= MaximumDiskDistanceToCentroid) {
+        componentTypes[componentId] = TileType::Tap;
       }
     }
     // Normalize the i coordinate if the tile is lowered.

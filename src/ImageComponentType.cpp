@@ -14,6 +14,8 @@ std::string imageComponentTypeToString(const ImageComponentType imageComponentTy
     return "Lowered side";
   case ImageComponentType::Arrow:
     return "Arrow";
+  case ImageComponentType::Disk:
+    return "Disk";
   }
   throw std::runtime_error("Cannot get string for component type.");
 }
