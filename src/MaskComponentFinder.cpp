@@ -145,7 +145,6 @@ void MaskComponentFinder::dissolveComponent(const ComponentId id) {
     const auto numberString = std::to_string(touchingEdge.size());
     std::string message = "Expected exactly 2 components to be touching the edge, but found " + numberString;
     std::sort(std::begin(touchingEdge), std::end(touchingEdge));
-    const auto componentList = joinIntoString(touchingEdge, ", ");
     message += " (" + joinIntoString(touchingEdge, ", ") + ").";
     throw std::runtime_error(message);
   }
