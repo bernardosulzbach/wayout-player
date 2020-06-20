@@ -16,18 +16,21 @@ namespace WayoutPlayer {
 class Image {
   std::vector<std::vector<Color<U8>>> data;
 
+  void setPixelIfInImage(IntegralScreenCoordinates coordinates, Color<U8> color);
+  ;
+
 public:
   Image(U32 imageHeight, U32 imageWidth);
 
-  [[nodiscard]] U32 getHeight() const;
+  [[nodiscard]] U32 getHeight() const noexcept;
 
-  [[nodiscard]] U32 getWidth() const;
+  [[nodiscard]] U32 getWidth() const noexcept;
 
-  [[nodiscard]] Color<U8> getPixel(U32 i, U32 j) const;
+  [[nodiscard]] Color<U8> getPixel(IntegralScreenCoordinates coordinates) const;
 
-  void setPixel(U32 i, U32 j, Color<U8> color);
+  void setPixel(IntegralScreenCoordinates coordinates, Color<U8> color);
 
-  void setCross(U32 centerI, U32 centerJ, U32 diameter, Color<U8> color);
+  void setCross(IntegralScreenCoordinates center, U32 diameter, Color<U8> color);
 
   [[nodiscard]] Mask findPixels(const std::function<bool(Color<U8>)> &predicate) const;
 

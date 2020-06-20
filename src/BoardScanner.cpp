@@ -158,18 +158,19 @@ void BoardScanner::writeColoredByComponent(const MaskComponentFinder &componentF
   const auto componentOfInterestColor = makeUniformlyDistributedColors(componentIds);
   for (U32 i = 0; i < componentFinder.getHeight(); i++) {
     for (U32 j = 0; j < componentFinder.getWidth(); j++) {
+      const auto coordinates = IntegralScreenCoordinates(i, j);
       const auto componentId = componentFinder.getComponentId({i, j});
       if (componentId == MaskComponentFinder::None) {
-        image.setPixel(i, j, LightGrey);
+        image.setPixel(coordinates, LightGrey);
       } else if (componentOfInterestColor.contains(componentId)) {
-        image.setPixel(i, j, componentOfInterestColor.at(componentId));
+        image.setPixel(coordinates, componentOfInterestColor.at(componentId));
       }
     }
   }
   for (const auto componentId : componentIds) {
     const auto coordinates = componentFinder.getComponentCentroid(componentId).roundToIntegralScreenCoordinates();
     const auto highContrastGrey = componentOfInterestColor.at(componentId).getHighContrastGrey();
-    image.setCross(coordinates.getI(), coordinates.getJ(), 5, highContrastGrey);
+    image.setCross(coordinates, 5, highContrastGrey);
   }
   image.writeImageToFile(debuggingPath.value() / filename);
 }
@@ -207,7 +208,9 @@ Board BoardScanner::scan(const Image &image) {
   // Find the darkest edges.
   auto mask = image.findPixels([](const Color<U8> color) { return color.getLightness() <= 25.0f; });
   // Open them by including their lighter neighbors.
-  mask.open([&image](const U32 i, const U32 j) { return image.getPixel(i, j).getLightness() <= 32.5f; });
+  mask.open([&image](const IntegralScreenCoordinates coordinates) {
+    return image.getPixel(coordinates).getLightness() <= 32.5f;
+  });
   MaskComponentFinder componentFinder(mask);
   if (isDebugging()) {
     writeColoredByComponent(componentFinder, {}, EdgesImageFilename);
@@ -252,11 +255,12 @@ Board BoardScanner::scan(const Image &image) {
   std::unordered_map<U32, Average<Color<F32>>> componentOfInterestAverageColor;
   for (U32 i = 0; i < componentFinder.getHeight(); i++) {
     for (U32 j = 0; j < componentFinder.getWidth(); j++) {
-      const auto componentId = componentFinder.getComponentId(i, j);
+      const auto coordinates = IntegralScreenCoordinates(i, j);
+      const auto componentId = componentFinder.getComponentId(coordinates);
       if (!components[ImageComponentType::Top].contains(componentId)) {
         continue;
       }
-      const auto color = image.getPixel(i, j);
+      const auto color = image.getPixel(coordinates);
       componentOfInterestAverageColor[componentId].add(Color<F32>(color.getR(), color.getG(), color.getB()));
     }
   }

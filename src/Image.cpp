@@ -4,47 +4,52 @@
 #include <opencv2/imgcodecs.hpp>
 
 namespace WayoutPlayer {
-Image::Image(U32 imageHeight, U32 imageWidth) : data(imageHeight, std::vector<Color<U8>>(imageWidth)) {
+void Image::setPixelIfInImage(const IntegralScreenCoordinates coordinates, const Color<U8> color) {
+  const auto i = coordinates.getI();
+  const auto j = coordinates.getJ();
+  if (i < 0 || i >= getHeight() || j < 0 || j >= getWidth()) {
+    return;
+  }
+  setPixel(coordinates, color);
 }
 
-U32 Image::getHeight() const {
+Image::Image(const U32 imageHeight, const U32 imageWidth) : data(imageHeight, std::vector<Color<U8>>(imageWidth)) {
+}
+
+U32 Image::getHeight() const noexcept {
   return data.size();
 }
 
-U32 Image::getWidth() const {
+U32 Image::getWidth() const noexcept {
   if (data.empty()) {
     return 0;
   }
   return data.front().size();
 }
 
-Color<U8> Image::getPixel(const U32 i, const U32 j) const {
-  return data[i][j];
+Color<U8> Image::getPixel(const IntegralScreenCoordinates coordinates) const {
+  return data[coordinates.getI()][coordinates.getJ()];
 }
 
-void Image::setPixel(const U32 i, const U32 j, const Color<U8> color) {
-  data[i][j] = color;
+void Image::setPixel(const IntegralScreenCoordinates coordinates, const Color<U8> color) {
+  data[coordinates.getI()][coordinates.getJ()] = color;
 }
 
-void Image::setCross(const U32 centerI, const U32 centerJ, const U32 diameter, const Color<U8> color) {
+void Image::setCross(const IntegralScreenCoordinates center, const U32 diameter, const Color<U8> color) {
   if (diameter == 0) {
     throw std::invalid_argument("Diameter must be nonzero.");
   }
   if (diameter % 2 == 0) {
     throw std::invalid_argument("Diameter must be odd.");
   }
-  const auto setPixelIfInImage = [this, color](const S64 i, const S64 j) {
-    if (i < 0 || i >= getHeight() || j < 0 || j >= getWidth()) {
-      return;
-    }
-    setPixel(i, j, color);
-  };
-  setPixelIfInImage(centerI, centerJ);
+  const auto centerI = center.getI();
+  const auto centerJ = center.getJ();
+  setPixelIfInImage(IntegralScreenCoordinates(centerI, centerJ), color);
   for (S64 distance = 1; distance <= (diameter - 1) / 2; distance++) {
-    setPixelIfInImage(centerI - distance, centerJ);
-    setPixelIfInImage(centerI, centerJ - distance);
-    setPixelIfInImage(centerI, centerJ + distance);
-    setPixelIfInImage(centerI + distance, centerJ);
+    setPixelIfInImage(IntegralScreenCoordinates(centerI - distance, centerJ), color);
+    setPixelIfInImage(IntegralScreenCoordinates(centerI, centerJ - distance), color);
+    setPixelIfInImage(IntegralScreenCoordinates(centerI, centerJ + distance), color);
+    setPixelIfInImage(IntegralScreenCoordinates(centerI + distance, centerJ), color);
   }
 }
 
@@ -52,8 +57,9 @@ Mask Image::findPixels(const std::function<bool(Color<U8>)> &predicate) const {
   Mask mask(getHeight(), getWidth());
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
-      if (predicate(getPixel(i, j))) {
-        mask.setValue(i, j, true);
+      const auto coordinates = IntegralScreenCoordinates(i, j);
+      if (predicate(getPixel(coordinates))) {
+        mask.setValue(coordinates, true);
       }
     }
   }
@@ -72,9 +78,10 @@ void Image::writeImageToFile(const std::filesystem::path &path) const {
   cv::Mat cvImage(getHeight(), getWidth(), cv::traits::Type<cv::Vec3b>::value);
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
-      cvImage.at<cv::Vec3b>(i, j)[0] = getPixel(i, j).getB();
-      cvImage.at<cv::Vec3b>(i, j)[1] = getPixel(i, j).getG();
-      cvImage.at<cv::Vec3b>(i, j)[2] = getPixel(i, j).getR();
+      const auto coordinates = IntegralScreenCoordinates(i, j);
+      cvImage.at<cv::Vec3b>(i, j)[0] = getPixel(coordinates).getB();
+      cvImage.at<cv::Vec3b>(i, j)[1] = getPixel(coordinates).getG();
+      cvImage.at<cv::Vec3b>(i, j)[2] = getPixel(coordinates).getR();
     }
   }
   cv::imwrite(path, cvImage);
@@ -98,7 +105,7 @@ Image readImageFromFile(const std::filesystem::path &path) {
       const auto b = cvPixel[0];
       const auto g = cvPixel[1];
       const auto r = cvPixel[2];
-      image.setPixel(i, j, Color(r, g, b));
+      image.setPixel(IntegralScreenCoordinates(i, j), Color(r, g, b));
     }
   }
   return image;

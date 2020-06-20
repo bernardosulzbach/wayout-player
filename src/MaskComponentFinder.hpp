@@ -23,8 +23,6 @@ private:
   ComponentId componentCount{};
   std::vector<Average<FloatingPointScreenCoordinates>> componentCentroid;
 
-  [[nodiscard]] std::vector<IntegralScreenCoordinates> getNeighbors(IntegralScreenCoordinates coordinates) const;
-
   void floodFill(IntegralScreenCoordinates start, const std::function<bool(IntegralScreenCoordinates)> &visit) const;
 
   void findComponents(const Mask &mask);
@@ -36,9 +34,9 @@ public:
 
   [[nodiscard]] U32 getWidth() const;
 
-  [[nodiscard]] ComponentId getComponentId(U32 i, U32 j) const;
-
   [[nodiscard]] ComponentId getComponentId(IntegralScreenCoordinates coordinates) const;
+
+  void setComponentId(IntegralScreenCoordinates coordinates, ComponentId newId);
 
   [[nodiscard]] ComponentId getComponentCount() const;
 

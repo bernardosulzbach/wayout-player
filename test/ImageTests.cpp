@@ -16,7 +16,7 @@ void readingAndWritingImagesToFilesShouldWork() {
       pixel.getR() = i;
       pixel.getG() = j;
       pixel.getB() = i + j;
-      image.setPixel(i, j, pixel);
+      image.setPixel(IntegralScreenCoordinates(i, j), pixel);
     }
   }
   const auto sampleImagePath = temporaryDirectoryPath / "sample-image.png";
@@ -32,16 +32,16 @@ void shouldCorrectlyFindPixelValuesInImages() {
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
       if (i == j) {
-        image.setPixel(i, j, diagonalPixel);
+        image.setPixel(IntegralScreenCoordinates(i, j), diagonalPixel);
       } else {
-        image.setPixel(i, j, nonDiagonalPixel);
+        image.setPixel(IntegralScreenCoordinates(i, j), nonDiagonalPixel);
       }
     }
   }
   const auto mask = image.findPixels([diagonalPixel](const Color<U8> pixel) { return pixel == diagonalPixel; });
   for (U32 i = 0; i < image.getHeight(); i++) {
     for (U32 j = 0; j < image.getWidth(); j++) {
-      BOOST_CHECK((i == j) == mask.getValue(i, j));
+      BOOST_CHECK((i == j) == mask.getValue(IntegralScreenCoordinates(i, j)));
     }
   }
 }

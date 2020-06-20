@@ -2,29 +2,12 @@
 
 #include <iostream>
 
+#include "GetNeighbors.hpp"
 #include "Text.hpp"
 
 namespace WayoutPlayer {
 using ComponentId = MaskComponentFinder::ComponentId;
 using IntegralScreenCoordinatesVector = std::vector<IntegralScreenCoordinates>;
-IntegralScreenCoordinatesVector MaskComponentFinder::getNeighbors(const IntegralScreenCoordinates coordinates) const {
-  std::vector<IntegralScreenCoordinates> neighbors;
-  const auto i = coordinates.getI();
-  const auto j = coordinates.getJ();
-  if (i > 0) {
-    neighbors.emplace_back(i - 1, j);
-  }
-  if (j > 0) {
-    neighbors.emplace_back(i, j - 1);
-  }
-  if (i + 1 < getHeight()) {
-    neighbors.emplace_back(i + 1, j);
-  }
-  if (j + 1 < getWidth()) {
-    neighbors.emplace_back(i, j + 1);
-  }
-  return neighbors;
-}
 
 using FloodFillVisitor = std::function<bool(IntegralScreenCoordinates)>;
 void MaskComponentFinder::floodFill(const IntegralScreenCoordinates start, const FloodFillVisitor &visit) const {
@@ -36,7 +19,7 @@ void MaskComponentFinder::floodFill(const IntegralScreenCoordinates start, const
     const auto currentPosition = next.front();
     next.pop();
     if (visit(currentPosition)) {
-      for (const auto &neighborPosition : getNeighbors(currentPosition)) {
+      for (const auto &neighborPosition : getNeighbors(*this, currentPosition)) {
         if (!enqueued.contains(neighborPosition)) {
           next.push(neighborPosition);
           enqueued.insert(neighborPosition);
@@ -49,29 +32,28 @@ void MaskComponentFinder::floodFill(const IntegralScreenCoordinates start, const
 void MaskComponentFinder::findComponents(const Mask &mask) {
   for (U32 i = 0; i < mask.getHeight(); i++) {
     for (U32 j = 0; j < mask.getWidth(); j++) {
-      if (mask.getValue(i, j) || getComponentId(i, j) != None) {
+      const auto coordinates = IntegralScreenCoordinates(i, j);
+      if (mask.getValue(coordinates) || getComponentId(coordinates) != None) {
         continue;
       }
       componentCentroid.emplace_back();
-      std::queue<std::pair<U32, U32>> nextPixels;
+      std::queue<IntegralScreenCoordinates> nextPixels;
       componentId[i][j] = componentCount;
       componentCentroid[componentCount].add(FloatingPointScreenCoordinates(i, j));
       nextPixels.push({i, j});
       while (!nextPixels.empty()) {
-        U32 pi = 0;
-        U32 pj = 0;
-        std::tie(pi, pj) = nextPixels.front();
+        const auto pixelCoordinates = nextPixels.front();
         nextPixels.pop();
-        if (componentId[pi][pj] != componentCount) {
+        if (getComponentId(pixelCoordinates) != componentCount) {
           throw std::logic_error("Should not have found another component.");
         }
-        for (const auto &neighbor : getNeighbors({pi, pj})) {
-          const auto ni = neighbor.getI();
-          const auto nj = neighbor.getJ();
-          if (!mask.getValue(ni, nj) && componentId[ni][nj] == None) {
-            componentId[ni][nj] = componentCount;
+        for (const auto &neighbor : getNeighbors(*this, pixelCoordinates)) {
+          if (!mask.getValue(neighbor) && getComponentId(neighbor) == None) {
+            setComponentId(neighbor, componentCount);
+            const auto ni = neighbor.getI();
+            const auto nj = neighbor.getJ();
             componentCentroid[componentCount].add(FloatingPointScreenCoordinates(ni, nj));
-            nextPixels.push({ni, nj});
+            nextPixels.push(neighbor);
           }
         }
       }
@@ -96,12 +78,13 @@ U32 MaskComponentFinder::getWidth() const {
   return componentId.front().size();
 }
 
-MaskComponentFinder::ComponentId MaskComponentFinder::getComponentId(U32 i, U32 j) const {
-  return componentId[i][j];
+MaskComponentFinder::ComponentId
+MaskComponentFinder::getComponentId(const IntegralScreenCoordinates coordinates) const {
+  return componentId[coordinates.getI()][coordinates.getJ()];
 }
 
-MaskComponentFinder::ComponentId MaskComponentFinder::getComponentId(IntegralScreenCoordinates coordinates) const {
-  return getComponentId(coordinates.getI(), coordinates.getJ());
+void MaskComponentFinder::setComponentId(const IntegralScreenCoordinates coordinates, const ComponentId newId) {
+  componentId[coordinates.getI()][coordinates.getJ()] = newId;
 }
 
 MaskComponentFinder::ComponentId MaskComponentFinder::getComponentCount() const {
@@ -122,7 +105,7 @@ IntegralScreenCoordinatesSet MaskComponentFinder::getEdgeAroundComponent(const C
   for (U32 i = 0; i < getHeight(); i++) {
     for (U32 j = 0; j < getWidth(); j++) {
       if (getComponentId(IntegralScreenCoordinates(i, j)) == id) {
-        for (const auto neighbor : getNeighbors(IntegralScreenCoordinates(i, j))) {
+        for (const auto neighbor : getNeighbors(*this, IntegralScreenCoordinates(i, j))) {
           if (getComponentId(neighbor) == None && !set.contains(neighbor)) {
             floodFill(neighbor, [this, &set](const IntegralScreenCoordinates coordinates) {
               if (set.contains(coordinates)) {
@@ -145,7 +128,7 @@ IntegralScreenCoordinatesSet MaskComponentFinder::getEdgeAroundComponent(const C
 std::vector<ComponentId> MaskComponentFinder::getComponentsTouchingEdge(const IntegralScreenCoordinatesSet &set) const {
   std::unordered_set<ComponentId> components;
   for (const auto coordinates : set) {
-    for (const auto neighbor : getNeighbors(coordinates)) {
+    for (const auto neighbor : getNeighbors(*this, coordinates)) {
       const auto neighborId = getComponentId(neighbor);
       if (neighborId != None) {
         components.insert(neighborId);

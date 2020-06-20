@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Color.hpp"
+#include "IntegralScreenCoordinates.hpp"
 #include "Types.hpp"
 
 namespace WayoutPlayer {
@@ -18,14 +19,14 @@ class Mask {
 public:
   Mask(U32 maskHeight, U32 maskWidth);
 
-  [[nodiscard]] U32 getHeight() const;
+  [[nodiscard]] U32 getHeight() const noexcept;
 
-  [[nodiscard]] U32 getWidth() const;
+  [[nodiscard]] U32 getWidth() const noexcept;
 
-  [[nodiscard]] bool getValue(U32 i, U32 j) const;
+  [[nodiscard]] bool getValue(IntegralScreenCoordinates coordinates) const;
 
-  void open(const std::function<bool(U32, U32)> &predicate);
+  void setValue(IntegralScreenCoordinates coordinates, bool value);
 
-  void setValue(U32 i, U32 j, bool value);
+  void open(const std::function<bool(IntegralScreenCoordinates)> &predicate);
 };
 } // namespace WayoutPlayer

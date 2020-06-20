@@ -65,6 +65,7 @@ add_library(
   src/Filesystem.hpp
   src/FloatingPointScreenCoordinates.cpp
   src/FloatingPointScreenCoordinates.hpp
+  src/GetNeighbors.hpp
   src/Hashing.cpp
   src/Hashing.hpp
   src/Image.cpp
