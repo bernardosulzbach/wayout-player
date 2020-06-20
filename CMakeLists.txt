@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(wayout-player)
+project(wayout-player LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,7 +24,11 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
       "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=leak")
 endif()
 
-add_definitions(-Werror)
+if(CODE_COVERAGE MATCHES "On")
+  message("Coverage enabled.")
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+endif()
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT HAS_IPO_SUPPORT OUTPUT IPO_ERROR)
@@ -42,7 +46,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories("include")
 
 add_library(
-  wayout-player OBJECT
+  wayout-player-objects OBJECT
   src/Argument.cpp
   src/Argument.hpp
   src/ArgumentFactory.cpp
@@ -101,11 +105,11 @@ list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${Boost_LIBRARIES})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OpenCV_LIBS})
 
-add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
+add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player-objects>)
 target_link_libraries(player ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 add_library(
-  wayout-player-tests OBJECT
+  wayout-player-test-objects OBJECT
   test/BoardComponentSplitterTests.cpp
   test/BoardComponentSplitterTests.hpp
   test/BoardTests.cpp
@@ -129,8 +133,8 @@ add_library(
   test/TileTypeTests.cpp
   test/TileTypeTests.hpp)
 
-add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>
-                    $<TARGET_OBJECTS:wayout-player-tests>)
+add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player-objects>
+                    $<TARGET_OBJECTS:wayout-player-test-objects>)
 target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 if(HAS_IPO_SUPPORT)
