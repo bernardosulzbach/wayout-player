@@ -54,8 +54,10 @@ static constexpr auto HeightChange = 17;
 static constexpr auto LightGrey = Color<U8>(224, 224, 224);
 
 // This is valid for 1920x1080 images.
-static constexpr auto MaximumArrowDistanceToCentroid = std::hypot(18.0f, 11.0f);
-static constexpr auto MaximumDiskDistanceToCentroid = std::hypot(1.0f, 1.0f);
+// Clang does not get: static constexpr auto MaximumArrowDistanceToCentroid = std::hypot(18.0f, 11.0f);
+static constexpr auto MaximumArrowDistanceToCentroid = 21.095023109728988f;
+// Clang does not get: static constexpr auto MaximumDiskDistanceToCentroid = std::hypot(1.0f, 1.0f);
+static constexpr auto MaximumDiskDistanceToCentroid = 1.4142135623730951f;
 
 static F32 getScaledMinimumExpectedLoweredSaturation() {
   return 0.0F;
