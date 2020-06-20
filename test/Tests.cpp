@@ -18,8 +18,8 @@ using namespace WayoutPlayer::Tests;
 bool init_unit_test() {
   auto &suite = boost::unit_test::framework::master_test_suite();
   // Board
-  suite.add(BOOST_TEST_CASE_NAME(&boardIsSolvedWorksOnSolvedBoards, "Is solved works on solved boards"));
-  suite.add(BOOST_TEST_CASE_NAME(&boardIsSolvedWorksOnUnsolvedBoards, "Is solved works on unsolved boards"));
+  suite.add(BOOST_TEST_CASE_NAME(&isSolvedReturnsTrueOnSolvedBoards, "isSolved() returns true on solved boards"));
+  suite.add(BOOST_TEST_CASE_NAME(&isSolvedReturnsFalseOnUnsolvedBoards, "isSolved() returns false on unsolved boards"));
   suite.add(BOOST_TEST_CASE_NAME(&boardStringConversionsWork, "Board string conversions work"));
   suite.add(BOOST_TEST_CASE_NAME(&activatingAChainShouldWork, "Activating a chain should work"));
   suite.add(BOOST_TEST_CASE_NAME(&boardsShouldBeDifferentIfTheirTilesAreNotBlocked,

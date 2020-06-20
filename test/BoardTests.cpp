@@ -5,11 +5,11 @@
 #include "../src/Board.hpp"
 
 namespace WayoutPlayer::Tests {
-void boardIsSolvedWorksOnSolvedBoards() {
+void isSolvedReturnsTrueOnSolvedBoards() {
   BOOST_CHECK(Board::fromString("D0").isSolved());
 }
 
-void boardIsSolvedWorksOnUnsolvedBoards() {
+void isSolvedReturnsFalseOnUnsolvedBoards() {
   BOOST_CHECK(!Board::fromString("D1").isSolved());
   BOOST_CHECK(!Board::fromString("B0").isSolved());
   BOOST_CHECK(!Board::fromString("B1").isSolved());
