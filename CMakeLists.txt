@@ -74,6 +74,7 @@ add_library(
   src/Numeric.hpp
   src/Position.cpp
   src/Position.hpp
+  src/Range.hpp
   src/Solution.cpp
   src/Solution.hpp
   src/Solver.cpp
@@ -86,7 +87,6 @@ add_library(
   src/Text.hpp
   src/Tile.cpp
   src/Tile.hpp
-  src/Range.hpp
   src/TileType.cpp
   src/TileType.hpp
   src/Types.hpp)
@@ -102,7 +102,33 @@ list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OpenCV_LIBS})
 add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
 target_link_libraries(player ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
-add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
+add_library(
+  wayout-player-tests OBJECT
+  test/BoardComponentSplitterTests.cpp
+  test/BoardComponentSplitterTests.hpp
+  test/BoardTests.cpp
+  test/BoardTests.hpp
+  test/ColorTests.cpp
+  test/ColorTests.hpp
+  test/HashingTests.cpp
+  test/HashingTests.hpp
+  test/ImageTests.cpp
+  test/ImageTests.hpp
+  test/MaskComponentFinderTests.cpp
+  test/MaskComponentFinderTests.hpp
+  test/PositionTests.cpp
+  test/PositionTests.hpp
+  test/RangeTests.cpp
+  test/RangeTests.hpp
+  test/SolverTests.cpp
+  test/SolverTests.hpp
+  test/TextTests.cpp
+  test/TextTests.hpp
+  test/TileTypeTests.cpp
+  test/TileTypeTests.hpp)
+
+add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>
+                    $<TARGET_OBJECTS:wayout-player-tests>)
 target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 if(HAS_IPO_SUPPORT)

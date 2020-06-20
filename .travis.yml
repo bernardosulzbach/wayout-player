@@ -15,8 +15,8 @@ addons:
       - libopencv-dev
 
 script:
-  # Ensure our namespace is always used.
-  - diff <(ls -l src | grep -i hpp | wc -l) <(git grep "namespace WayoutPlayer {" -- src | grep -i hpp | wc -l)
+  # Ensure our C++ consistency rules.
+  - bash scripts/check_cpp_consistency.sh
   # Ensure code is already properly formatted.
   - diff -u <(cat src/* test/*) <(clang-format src/* test/*)
   # Ensure no committed file is larger than the file size limit.

@@ -2,6 +2,7 @@
 
 #include <locale>
 #include <sstream>
+#include <type_traits>
 
 #include "Types.hpp"
 
@@ -18,6 +19,7 @@ struct ThousandsFacet : public std::numpunct<char> {
 };
 
 template <typename T> std::string integerToStringWithThousandSeparators(T t) {
+  static_assert(std::is_integral<T>::value);
   std::locale global;
   std::locale withGroupings(global, new ThousandsFacet);
   std::stringstream stream;
@@ -35,7 +37,11 @@ template <typename Iterable> std::string joinIntoString(const Iterable &iterable
     if (!first) {
       result += separator;
     }
-    result += std::to_string(element);
+    if constexpr (std::is_same<decltype(element), std::string>::value) {
+      result += element;
+    } else {
+      result += std::to_string(element);
+    }
     first = false;
   }
   return result;
