@@ -184,7 +184,7 @@ findClosest(const std::vector<FloatingPointScreenCoordinates> &coordinateVector,
   }
   std::vector<std::pair<F32, U32>> distanceVector;
   for (U32 i = 0; i < coordinateVector.size(); i++) {
-    distanceVector.push_back({coordinateVector[i].distanceTo(coordinates), i});
+    distanceVector.emplace_back(coordinateVector[i].distanceTo(coordinates), i);
   }
   std::partial_sort(std::begin(distanceVector), std::begin(distanceVector) + count, std::end(distanceVector));
   std::vector<FloatingPointScreenCoordinates> closest;
