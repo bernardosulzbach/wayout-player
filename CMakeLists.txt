@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(wayout-player)
+project(wayout-player LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
@@ -22,7 +24,11 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
       "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=leak")
 endif()
 
-add_definitions(-Werror)
+if(CODE_COVERAGE MATCHES "On")
+  message("Coverage enabled.")
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+endif()
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT HAS_IPO_SUPPORT OUTPUT IPO_ERROR)
@@ -34,47 +40,103 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+find_package(OpenCV REQUIRED core imgcodecs imgproc)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+include_directories("include")
+
 add_library(
-  wayout-player OBJECT
+  wayout-player-objects OBJECT
+  src/Argument.cpp
+  src/Argument.hpp
+  src/ArgumentFactory.cpp
+  src/ArgumentFactory.hpp
   src/ArgumentParser.cpp
   src/ArgumentParser.hpp
-  src/SystemInformation.cpp
-  src/SystemInformation.hpp
+  src/Average.hpp
   src/Board.cpp
   src/Board.hpp
-  src/Types.hpp
+  src/BoardComponentSplitter.cpp
+  src/BoardComponentSplitter.hpp
+  src/BoardScanner.cpp
+  src/BoardScanner.hpp
+  src/Color.hpp
+  src/Filesystem.cpp
+  src/Filesystem.hpp
+  src/FloatingPointScreenCoordinates.cpp
+  src/FloatingPointScreenCoordinates.hpp
+  src/GetNeighbors.hpp
+  src/Hashing.cpp
+  src/Hashing.hpp
+  src/Image.cpp
+  src/Image.hpp
+  src/ImageComponentType.cpp
+  src/ImageComponentType.hpp
+  src/IntegralScreenCoordinates.cpp
+  src/IntegralScreenCoordinates.hpp
+  src/Mask.cpp
+  src/Mask.hpp
+  src/MaskComponentFinder.cpp
+  src/MaskComponentFinder.hpp
+  src/Numeric.hpp
   src/Position.cpp
   src/Position.hpp
-  src/Tile.cpp
-  src/Tile.hpp
-  src/Text.cpp
-  src/Text.hpp
+  src/Range.hpp
+  src/Solution.cpp
+  src/Solution.hpp
   src/Solver.cpp
   src/Solver.hpp
   src/SolverConfiguration.cpp
   src/SolverConfiguration.hpp
+  src/SystemInformation.cpp
+  src/SystemInformation.hpp
+  src/Text.cpp
+  src/Text.hpp
+  src/Tile.cpp
+  src/Tile.hpp
   src/TileType.cpp
   src/TileType.hpp
-  src/Filesystem.cpp
-  src/Filesystem.hpp
-  src/Hashing.cpp
-  src/Hashing.hpp
-  src/Solution.cpp
-  src/Solution.hpp)
+  src/Types.hpp)
 
 find_package(Threads REQUIRED)
 
-add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player>)
-target_link_libraries(test ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(test ${OPENSSL_SSL_LIBRARY})
-target_link_libraries(test ${Boost_LIBRARIES})
-target_link_libraries(test ${CMAKE_THREAD_LIBS_INIT})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OPENSSL_SSL_LIBRARY})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${Boost_LIBRARIES})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+list(APPEND WAYOUT_PLAYER_LINK_LIBRARIES ${OpenCV_LIBS})
 
-add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player>)
-target_link_libraries(player ${OPENSSL_CRYPTO_LIBRARY})
-target_link_libraries(player ${OPENSSL_SSL_LIBRARY})
-target_link_libraries(player ${Boost_LIBRARIES})
-target_link_libraries(player ${CMAKE_THREAD_LIBS_INIT})
+add_executable(player src/Player.cpp $<TARGET_OBJECTS:wayout-player-objects>)
+target_link_libraries(player ${WAYOUT_PLAYER_LINK_LIBRARIES})
+
+add_library(
+  wayout-player-test-objects OBJECT
+  test/BoardComponentSplitterTests.cpp
+  test/BoardComponentSplitterTests.hpp
+  test/BoardTests.cpp
+  test/BoardTests.hpp
+  test/ColorTests.cpp
+  test/ColorTests.hpp
+  test/HashingTests.cpp
+  test/HashingTests.hpp
+  test/ImageTests.cpp
+  test/ImageTests.hpp
+  test/MaskComponentFinderTests.cpp
+  test/MaskComponentFinderTests.hpp
+  test/PositionTests.cpp
+  test/PositionTests.hpp
+  test/RangeTests.cpp
+  test/RangeTests.hpp
+  test/SolverTests.cpp
+  test/SolverTests.hpp
+  test/TextTests.cpp
+  test/TextTests.hpp
+  test/TileTypeTests.cpp
+  test/TileTypeTests.hpp)
+
+add_executable(test test/Tests.cpp $<TARGET_OBJECTS:wayout-player-objects>
+                    $<TARGET_OBJECTS:wayout-player-test-objects>)
+target_link_libraries(test ${WAYOUT_PLAYER_LINK_LIBRARIES})
 
 if(HAS_IPO_SUPPORT)
   message(STATUS "IPO enabled")

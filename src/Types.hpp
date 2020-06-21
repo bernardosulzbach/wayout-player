@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+namespace WayoutPlayer {
 using U8 = uint8_t;
 using U32 = uint32_t;
 using U64 = uint64_t;
@@ -14,3 +15,4 @@ using IndexType = S8;
 
 using F32 = float;
 using F64 = double;
+} // namespace WayoutPlayer

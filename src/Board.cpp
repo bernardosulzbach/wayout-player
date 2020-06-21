@@ -1,5 +1,7 @@
 #include "Board.hpp"
 
+#include <cctype>
+
 #include <boost/functional/hash.hpp>
 
 namespace WayoutPlayer {
@@ -9,6 +11,9 @@ S32 Board::getRowCount() const {
 }
 
 S32 Board::getColumnCount() const {
+  if (getRowCount() == 0) {
+    return 0;
+  }
   return static_cast<S32>(matrix.front().size());
 }
 
@@ -74,9 +79,8 @@ void Board::safeInvert(IndexType i, IndexType j, bool clicked, InversionHistory 
 }
 
 Board::Board(std::vector<std::vector<std::optional<Tile>>> tileMatrix) : matrix(std::move(tileMatrix)) {
-  const auto firstRowSize = matrix.front().size();
   for (const auto &row : matrix) {
-    if (row.size() != firstRowSize) {
+    if (row.size() != matrix.front().size()) {
       throw std::invalid_argument("Matrix is not rectangular.");
     }
     for (const auto tile : row) {
@@ -107,6 +111,10 @@ bool Board::hasTile(IndexType i, IndexType j) const {
 
 Tile Board::getTile(IndexType i, IndexType j) const {
   return matrix[i][j].value();
+}
+
+void Board::setTile(IndexType i, IndexType j, const Tile &tile) {
+  matrix[i][j] = tile;
 }
 
 bool Board::isSolved() const {
@@ -184,113 +192,6 @@ bool Board::operator!=(const Board &rhs) const {
   return !(rhs == *this);
 }
 
-std::vector<Board> Board::splitComponents() const {
-  using TagType = U32;
-  const auto NoTag = std::numeric_limits<TagType>::max();
-  using TaggedTileMatrix = std::vector<std::vector<TagType>>;
-  const auto rowCount = getRowCount();
-  const auto columnCount = getColumnCount();
-  TaggedTileMatrix tagMatrix(rowCount, std::vector<TagType>(columnCount, NoTag));
-  TagType currentTag = 0;
-  auto foundTwin = false;
-  using PositionFunction = std::function<void(S32, S32)>;
-  const PositionFunction propagateTag = [this, &tagMatrix, &currentTag, &foundTwin, &propagateTag](S32 i, S32 j) {
-    if (!hasTile(i, j)) {
-      return;
-    }
-    if (tagMatrix[i][j] == NoTag) {
-      tagMatrix[i][j] = currentTag;
-      // Propagate to all other twins.
-      const auto rowCount = getRowCount();
-      const auto columnCount = getColumnCount();
-      if (getTile(i, j).type == TileType::Twin) {
-        // This check is important to prevent an infinite recursion.
-        if (!foundTwin) {
-          foundTwin = true;
-          for (S32 oi = 0; oi < rowCount; oi++) {
-            for (S32 oj = 0; oj < columnCount; oj++) {
-              if (oi == i && oj == j) {
-                continue;
-              }
-              if (hasTile(oi, oj)) {
-                if (getTile(oi, oj).type == TileType::Twin) {
-                  propagateTag(oi, oj);
-                }
-              }
-            }
-          }
-        }
-      }
-      propagateTag(i - 1, j);
-      propagateTag(i, j - 1);
-      propagateTag(i, j + 1);
-      propagateTag(i + 1, j);
-    } else if (tagMatrix[i][j] != currentTag) {
-      throw std::runtime_error("Should not happen: found a tile tagged with another tag while propagating a tag.");
-    }
-  };
-  for (S32 i = 0; i < rowCount; i++) {
-    for (S32 j = 0; j < columnCount; j++) {
-      if (hasTile(i, j)) {
-        if (tagMatrix[i][j] == NoTag) {
-          propagateTag(i, j);
-          currentTag++;
-        }
-      }
-    }
-  }
-  const auto componentCount = currentTag;
-  const auto emptyRow = std::vector<std::optional<Tile>>(columnCount);
-  using TileMatrix = std::vector<std::vector<std::optional<Tile>>>;
-  const auto emptyTileMatrix = TileMatrix(rowCount, emptyRow);
-  auto tileMatrices = std::vector<TileMatrix>(componentCount, emptyTileMatrix);
-  for (S32 i = 0; i < rowCount; i++) {
-    for (S32 j = 0; j < columnCount; j++) {
-      if (tagMatrix[i][j] != NoTag) {
-        tileMatrices[tagMatrix[i][j]][i][j] = getTile(i, j);
-      }
-    }
-  }
-  auto components = std::vector<Board>{};
-  for (const auto &tileMatrix : tileMatrices) {
-    components.emplace_back(tileMatrix);
-  }
-  return components;
-}
-
-Board Board::mergeComponents(const std::vector<Board> &components) {
-  if (components.empty()) {
-    throw std::invalid_argument("Components should not be empty.");
-  }
-  const auto rowCount = components.front().getRowCount();
-  const auto columnCount = components.front().getColumnCount();
-  for (const auto &component : components) {
-    if (component.getRowCount() != rowCount) {
-      throw std::invalid_argument("Components have different number of rows.");
-    } else {
-      if (component.getColumnCount() != columnCount) {
-        throw std::invalid_argument("Components have different number of columns.");
-      }
-    }
-  }
-  Board merge(std::vector<std::vector<std::optional<Tile>>>(rowCount, std::vector<std::optional<Tile>>(columnCount)));
-  for (const auto &component : components) {
-    for (S32 i = 0; i < rowCount; i++) {
-      for (S32 j = 0; j < columnCount; j++) {
-        if (component.hasTile(i, j)) {
-          if (merge.hasTile(i, j)) {
-            const auto position = Position(i, j);
-            throw std::invalid_argument("Found two occurrences of tile " + position.toString() + ".");
-          } else {
-            merge.matrix[i][j] = component.matrix[i][j];
-          }
-        }
-      }
-    }
-  }
-  return merge;
-}
-
 std::string Board::toString() const {
   const auto rowCount = getRowCount();
   const auto columnCount = getColumnCount();
@@ -322,7 +223,7 @@ Board Board::fromString(const std::string &string) {
   for (std::size_t i = 0; i < string.size(); i++) {
     const auto character = string[i];
     if (atNextTile) {
-      if (isalpha(character)) {
+      if (std::isalpha(character) != 0) {
         matrix.back().emplace_back(Tile(false, tileTypeFromCharacter(character)));
         atNextTile = false;
       } else if (character == ' ') {
@@ -333,7 +234,7 @@ Board Board::fromString(const std::string &string) {
         throw std::invalid_argument("Found an unexpected start of tile: " + std::string(1, character) + ".");
       }
     } else {
-      if (isdigit(character)) {
+      if (std::isdigit(character) != 0) {
         matrix.back().back()->up = character == '1';
       } else if (character == '\n') {
         matrix.emplace_back();

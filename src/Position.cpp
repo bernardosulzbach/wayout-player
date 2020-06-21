@@ -4,7 +4,7 @@
 #include <sstream>
 
 namespace WayoutPlayer {
-Position::Position(IndexType i, IndexType j) : i(i), j(j) {
+Position::Position(IndexType positionI, IndexType positionJ) : i(positionI), j(positionJ) {
 }
 
 bool Position::operator==(const Position &rhs) const {

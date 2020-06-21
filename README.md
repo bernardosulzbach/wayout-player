@@ -8,13 +8,16 @@ An automated player for the [Wayout](https://store.steampowered.com/app/551110/W
 
 A complete script for building and running this project is [`build.sh`](build.sh).
 
+The Travis CI pipeline uses Ubuntu Focal Fossa (20.04), CMake 3.12.4, Clang 7.0.0, GCC 9.3.0, Boost 1.71, OpenSSL 1.1.1f, and OpenCV 4.2.0.
+You may need other dependencies as well.
+
 # Running
 
 ```bash
 # Because this process can use a TON of RAM, limiting it is a good idea.
 # If you run with no swap, it is basically a requirement to ensure system stability.
 # The following line limits the memory usage to 1 GiB on Linux.
-systemd-run --scope -p MemoryMax=1G ./player ../input/$INPUT.txt
+systemd-run --scope -p MemoryMax=1G ./player --input ../input/$INPUT.txt
 ```
 
 ## Inputs

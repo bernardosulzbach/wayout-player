@@ -1,9 +1,12 @@
+#include "ArgumentFactory.hpp"
 #include "ArgumentParser.hpp"
 #include "Board.hpp"
+#include "BoardScanner.hpp"
 #include "Filesystem.hpp"
 #include "Solver.hpp"
 #include "SystemInformation.hpp"
 
+#include <gsl/span>
 #include <iostream>
 
 using namespace WayoutPlayer;
@@ -13,12 +16,41 @@ void informAboutException(const std::exception &exception) {
   std::cout << "  " << exception.what() << '\n';
 }
 
+Board boardFromInputPath(const ArgumentParser &argumentParser) {
+  const auto inputPath = argumentParser.getArgument(ArgumentFactory::makeInputArgument()).at(0);
+  if (inputPath.ends_with(".txt")) {
+    const auto boardString = readFile(inputPath);
+    return Board::fromString(boardString);
+  }
+  if (inputPath.ends_with(".png")) {
+    const auto image = readImageFromFile(inputPath);
+    BoardScanner boardScanner;
+    if (argumentParser.hasArgument(ArgumentFactory::makeDebuggingPathArgument())) {
+      const auto debuggingPath = argumentParser.getArgument(ArgumentFactory::makeDebuggingPathArgument()).at(0);
+      boardScanner.setDebuggingPath(debuggingPath);
+    }
+    return boardScanner.scan(image);
+  }
+  throw std::runtime_error("Could not figure out the file type from the extension.");
+}
+
 int main(int argc, char **argv) {
   try {
-    ArgumentParser argumentParser;
-    argumentParser.parseArguments(argc, argv);
-    const auto boardString = readFile(argumentParser.getArgument(1));
-    const auto board = Board::fromString(boardString);
+    std::vector<std::string> commandLineArguments(argc - 1);
+    gsl::span<char *, gsl::dynamic_extent> argumentSpan(argv, argc);
+    for (int i = 1; i < argc; i++) {
+      commandLineArguments[i - 1] = argumentSpan[i];
+    }
+    ArgumentParser argumentParser(commandLineArguments);
+    if (argumentParser.hasArgument(ArgumentFactory::makeHelpArgument())) {
+      std::cout << "Wayout Player Options" << '\n';
+      for (const auto &argument : ArgumentFactory::makeAllArguments()) {
+        std::cout << '\n' << argument.toHelpString() << '\n';
+      }
+      return 0;
+    }
+    const auto board = boardFromInputPath(argumentParser);
+    std::cout << "Solving the following board." << '\n';
     std::cout << board.toString() << '\n';
     auto solver = Solver();
     solver.getSolverConfiguration().setVerbose(true);

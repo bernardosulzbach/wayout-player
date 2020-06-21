@@ -10,7 +10,7 @@ public:
   IndexType i = 0;
   IndexType j = 0;
 
-  Position(IndexType i, IndexType j);
+  Position(IndexType positionI, IndexType positionJ);
 
   bool operator==(const Position &rhs) const;
 

@@ -49,6 +49,8 @@ public:
 
   [[nodiscard]] Tile getTile(IndexType i, IndexType j) const;
 
+  void setTile(IndexType i, IndexType j, const Tile &tile);
+
   [[nodiscard]] bool isSolved() const;
 
   void activate(IndexType i, IndexType j);
@@ -58,17 +60,6 @@ public:
   bool operator==(const Board &rhs) const;
 
   bool operator!=(const Board &rhs) const;
-
-  /**
-   * Splits a board into its connected components.
-   *
-   * Supports all tile types.
-   *
-   * The components are returned in no particular order.
-   */
-  [[nodiscard]] std::vector<Board> splitComponents() const;
-
-  static Board mergeComponents(const std::vector<Board> &components);
 
   [[nodiscard]] std::string toString() const;
 

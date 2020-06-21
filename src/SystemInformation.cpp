@@ -9,6 +9,8 @@
 #include <vector>
 
 namespace WayoutPlayer {
+static constexpr auto BytesInKiB = 1024;
+
 SystemInformation::SystemInformation() {
 #ifdef __linux__
   rusage resourceUsage{};
@@ -28,7 +30,7 @@ SystemInformation::SystemInformation() {
   //   This is the maximum resident set size used (in kilobytes).
   //
   // Bernardo Sulzbach: they actually meant kibibytes.
-  maximumResidentSetSize = 1024 * readMaximumResidentSetSize;
+  maximumResidentSetSize = BytesInKiB * readMaximumResidentSetSize;
 #endif
 }
 
@@ -37,11 +39,11 @@ U64 SystemInformation::getMaximumResidentSetSizeInBytes() const {
 }
 
 std::string SystemInformation::getMaximumResidentSetSizeAsHumanReadableString() const {
-  F64 value = maximumResidentSetSize;
+  auto value = getMaximumResidentSetSizeInBytes();
   std::vector<std::string> units = {"B", "KiB", "MiB", "GiB"};
   U32 multiple = 0;
-  while (multiple + 1 < units.size() && value > 1024.0) {
-    value /= 1024.0;
+  while (multiple + 1 < units.size() && value > BytesInKiB) {
+    value /= BytesInKiB;
     multiple++;
   }
   std::stringstream stream;

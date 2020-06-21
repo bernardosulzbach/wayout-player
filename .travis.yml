@@ -1,4 +1,4 @@
-dist: bionic
+dist: focal
 language: cpp
 
 compiler:
@@ -7,9 +7,22 @@ compiler:
 
 addons:
   apt:
+    update: true
     packages:
       - build-essential
       - cmake
       - libboost-all-dev
+      - libopencv-dev
 
-script: mkdir build && cd build && cmake .. && make && ./test
+script:
+  # Ensure our C++ consistency rules.
+  - bash scripts/check_cpp_consistency.sh
+  # Ensure code is already properly formatted.
+  - diff -u <(cat src/* test/*) <(clang-format src/* test/*)
+  # Ensure no committed file is larger than the file size limit.
+  - python3 scripts/ensure_git_has_no_large_files.py
+  - mkdir build && cd build || exit
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  - clang-tidy ../src/*
+  - cmake --build .
+  - ./test --report_level=detailed

@@ -8,7 +8,7 @@ std::string WayoutPlayer::Tile::toString() const {
   return string;
 }
 
-Tile::Tile(bool up, TileType type) : up(up), type(type) {
+Tile::Tile(bool tileUp, TileType tileType) : up(tileUp), type(tileType) {
 }
 
 bool Tile::operator==(const Tile &rhs) const {
