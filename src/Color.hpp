@@ -56,9 +56,9 @@ public:
     assertInRange<F32>(0.0F - HsvEpsilon, s, 1.0F + HsvEpsilon);
     assertInRange<F32>(0.0F - HsvEpsilon, v, 1.0F + HsvEpsilon);
     const auto source = cv::Mat3f(cv::Vec3f(h, s, v));
-    auto destination = cv::Mat3f(1, 1);
-    cv::cvtColor(source, destination, cv::ColorConversionCodes::COLOR_HSV2RGB);
-    auto result = destination.at<cv::Vec3f>(0, 0);
+    auto __destination = cv::Mat3f(1, 1);
+    cv::cvtColor(source, __destination, cv::ColorConversionCodes::COLOR_HSV2RGB);
+    auto result = __destination.at<cv::Vec3f>(0, 0);
     if constexpr (std::is_same<DataType, U8>::value) {
       result *= std::numeric_limits<U8>::max();
       for (U32 i = 0; i < 3; i++) {
